@@ -1,0 +1,16 @@
+<form class="contact_form" action="#" id="contact_form" runat="server">
+ <div> <ul> <li> <h2>Contactos</h2> <span class="required_notification">* Datos requeridos</span> 
+ </li> 
+ <li>Proveedor: <datalist>
+ <option value="Provedor1">
+ <option value="Provedor2">
+ </datalist>
+ </li>
+ 
+ <li> <label for="name">Titulo:</label> <input type="text" placeholder="Cambio de aceite" required /> </li> 
+ <li> <label for="fechaInicio">Fecha de Inicio:</label> <input type="date" name="fechaInicio" required /></li> 
+ <li> <label for="website">Sitio web:</label> <input type="url" name="website" placeholder="http://developerji.com" required pattern="(http|https)://.+" /> <span class="form_hint">Formato correcto: "http://developerji.com"</span> 
+ </li> 
+ <li> <label for="message">Mensaje:</label> <textarea name="message" cols="40" rows="6" required></textarea> </li> 
+ <li> <button class="submit" type="submit">Enviar mensaje</button> </li> </ul> </div> 
+ </form>
