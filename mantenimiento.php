@@ -1,6 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:ice="http://ns.adobe.com/incontextediting"><!-- InstanceBegin template="/Templates/Template_Base.dwt.php" codeOutsideHTMLIsLocked="false" -->
 <head>
+<link rel="icon" type="image/x-icon" href="Imagenes/sermico.ico" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <!-- InstanceBeginEditable name="doctitle" -->
 <title>SERMICO SRL</title>
@@ -35,121 +36,127 @@ Vehiculo:
 <select id="comboBoxVehiculo">Vehiculo: </select>
 </div>
   
-
+<h2>Mantenimientos realizados</h2>
 
 <div id="tablaMantenimientos">
 
 </div>
 
 
+ <li><label>Proveedor:</label>
+<input type="text" id="proveedor" readonly="readonly"/></li>
+<li><label>Descripcion:</label></li>
+<li><textarea id="descripcion" cols="60" row="20" readonly="readonly"></textarea></li>
+
+
+
+
+<div id="tablaPartesMantenimientos">
+<h2>Partes incluidas en el mantenimiento</h2>
+<table id="tablaPartesMantenimientos"><tr>
+<th>ID</th><th>Nombre</th></tr>
+
+</table>
+</div>
+
+
+<h2>Descripcion del mantenimiento</h2>
+ <li> <label>Parte:</label>
+ <input type="text" id="parteSeleccionada"/> </li>
+ <li><label>Operacion:</label>
+ <input type="text" id="operacion"/> </li>
+ 
+  <li>  <label>Descripcion:</label> </li>
+  <li>
+ <textarea id="descripcion" rows="10" cols="40"></textarea> </li> 
+ <li> <label>Observaciones:</label> </li>
+ <li> <textarea id="observaciones" rows="10" cols="40"></textarea></li>
+
+
+<div id="prueba">
+
+</div>
+
 <script>
 
-$vehiculoActual=0;
-loadComboFromDB("#comboBoxVechiculoMantenimiento","cargarComboBoxVehiculos");
 
-$("#comboBoxVechiculoMantenimiento").on('input', function () {
-    var val = this.value;
-    if($('option').filter(function(){
-        return this.value === val;        
-    }).length) {
-        //send ajax request
-		$vehiculoActual=this.value;
-loadTableFromDb("#tablaMantenimientos","cargarTablaMantenimiento",$vehiculoActual);
-}
+loadComboFromDB("#comboBoxFiltro","cargarComboBoxTipos",function(){
+	var $tipo=$("#comboBoxFiltro").val();
+	loadComboFromDBWithType("#comboBoxVehiculo","getVehiculosPorTipo",$tipo,function(){
+	$vehiculoActual=$("#comboBoxVehiculo").val();
+	loadTableFromDb("#tablaMantenimientos","cargarTablaMantenimiento",					$vehiculoActual);
+	});
+	
 });
 
- $.ajax({
-	url: 'Includes/FuncionesDB.php',
-	type: 'POST',
-	dataType:"html",
-	data: {tarea:"cargarComboBoxTipos"},
-	success: function(response) {
-		$("#comboBoxFiltro").html(response);
-		 var $tipo=$("#comboBoxFiltro").val();
 
- 
- 
-$.ajax({
-	url: 'Includes/FuncionesDB.php',
-	type: 'POST',
-	dataType:"html",
-	data: {tarea:"getVehiculosPorTipo",tipo:$tipo},
-	success: function(response) {
-		$("#comboBoxVehiculo").html(response);
-	},
-	error: function(){
-	alert('Error en combo');
-	}
-});	 
-	 
-	},
-	error: function(){
-	alert('Error en combo');
-	}
-	});
-
-$("#comboBoxFiltro").on("input",function(){
+$('#tablaMantenimientos').on( 'click', 'td', function (e) {
+	$("#descripcion").val("");
+	var $row = jQuery(this).closest('tr');
+    var $columns = $row.find('td');
+	jQuery.each($columns, function(i, item) {
+		if(i<=0){
+        	values = item.innerHTML ;
+			if(i==0){
+				idParteActual=item.innerHTML;
+			}
+		}
+		
+    });
 	
-    var $tipo=$("#comboBoxFiltro").val();
 	$.ajax({
-		url: 'Includes/FuncionesDB.php',
-		type: 'POST',
-		dataType:"html",
-		data: {tarea:"getVehiculosPorTipo",tipo:$tipo},
-		success: function(response) {
-			$("#comboBoxVehiculo").html(response);
-			 var $vehiculo=$("#comboBoxVehiculo").val();
-	 $.ajax({
 	url: 'Includes/FuncionesDB.php',
 	type: 'POST',
 	async:true,
 	dataType:'json',
-	data: {tarea:"getKm",vehiculo:$vehiculo},
-	timeout:5000,
+	data: {tarea:'getMantenimiento',idMantenimiento:values},
+	timeout:1000,
 	success: function(data, textStatus, jqXHR) {
-		var kmAnterior=0;
-		if(data.km!=null){
-			kmAnterior=data.km;
-		}
-		$("#kmAnterior").val(kmAnterior);
-		 
+		$("#descripcion").val(data.descripcion);
+		$("#proveedor").val(data.proveedor);
 	},
 	error: function( obj,text,error ){
 		alert(text);
 	}
-	});
-		},
-		error: function(){
-		alert('Error en combo');
-		}
-	});	
-
+	});/*
 	
+	$.ajax({
+	url: 'Includes/FuncionesDB.php',
+	type: 'POST',
+	async:true,
+	dataType:'html',
+	data: {tarea:'getPartes',idMantenimiento:2,idVehiculo:1},
+	timeout:1000,
+	success: function(data, textStatus, jqXHR) {
+		alert(data);
+	},
+	error: function( obj,text,error ){
+		alert(text);
+	}
+	});*/
+	 
+} );
+
+
+$("#comboBoxFiltro").on("input",function(){
+	
+	
+    var $tipo=$("#comboBoxFiltro").val();
+	loadComboFromDBWithType("#comboBoxVehiculo","getVehiculosPorTipo",$tipo,function(){
+	$vehiculoActual=$("#comboBoxVehiculo").val();
+	loadTableFromDb("#tablaMantenimientos","cargarTablaMantenimiento",					$vehiculoActual);
+	});
+	
+});
+
+$("#comboBoxVehiculo").on("click",this,function(){
+	$vehiculoActual=$("#comboBoxVehiculo").val();
+	loadTableFromDb("#tablaMantenimientos","cargarTablaMantenimiento",					$vehiculoActual);
 });
 
 </script>
 
-<!--
-$("#tablas").on("click", ".add", function(){
-	
-	var $row = jQuery(this).closest('tr');
-    var $columns = $row.find('td');
 
-    var values = '<tr><td>';
-    
-    jQuery.each($columns, function(i, item) {
-        values = values + item.innerHTML ;
-    });
-	
-	values += '</tr>';
-	$("#mitabla2").append(values);
-});
-
-  
-  <!--
-deleteRow("#mitabla1","#mitabla2",".delete","#tablas");
-addRowAtTableOnClick("#tablas","#mitabla",".add");
--->
   
   
   <!-- InstanceEndEditable -->

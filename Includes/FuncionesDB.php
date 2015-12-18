@@ -53,7 +53,20 @@ case 'altaViaje':
 		altaViaje();
 		break;
 		
+case 'getPartes':
+		getPartes();
+		break;
+		
+case 'getMantenimiento':
+		getMantenimiento();
+		break;
+		
+case  'altaVehiculo':
+	   altaVehiculo();
+	   break;
 }
+		
+
 
 
 
@@ -131,13 +144,38 @@ function cargarTablaMantenimiento($vehiculo){
 	  return;
 }
 
+function altaVehiculo(){
+	$tipo=$_POST["tipo"];
+	$numero=$_POST["numero"];
+	 $año=$_POST["año"];
+	 $combustible=$_POST["combustible"];
+	 $consumo=$_POST["consumo"];
+	 $descripcion=$_POST["descripcion"];
+	 $km=$_POST["km"];
+	 $marca=$_POST["marca"];
+	 $modelo=$_POST["modelo"];
+	 $modeloMotor=$_POST["modeloMotor"];
+	 $motor=$_POST["motor"];
+	 $ot=$_POST["ot"];
+	 $patente=$_POST["patente"];
+	 $chasis=$_POST["chasis"];
+
+	$query = "CALL alta_vehiculo('".$numero."','".$patente."','".$marca."','".$modelo."','".$año."',null".",'".$motor."','".$chasis."','".$modeloMotor."','".$ot."','".$tipo."');";
+	echo $query;
+	$result = executeQuery($query);   
+	//$row = mysql_fetch_array($result);
+	
+	
+}
+
 function cargarTablaPartes($vehiculo,$tipo){
 	
 	
-	  $query = "CALL listar_partes('".$vehiculo."','".$tipo."')";
+	  $query = "CALL listar_partes('".$vehiculo."',0,'".$tipo."')";
 	  $result = executeQuery($query);
 	  $tabla="";
-	   
+	  echo $query;
+	  if(mysql_num_rows($result) != 0){
 	while($row = mysql_fetch_array($result))
 	  {
 		$tabla=$tabla."<tr><td>". 
@@ -146,7 +184,9 @@ function cargarTablaPartes($vehiculo,$tipo){
 			$tabla=$tabla."</tr>";
 				
 	  }
-	 	
+	  }else{
+		echo $query;
+	  }
 	  
 	 echo $tabla;
 
@@ -156,28 +196,32 @@ function cargarTablaPartes($vehiculo,$tipo){
 function cargarTablaPartesDePartes($vehiculo,$tipo,$parte){
 	
 	
-	  $query = "CALL listar_partes_de_partes(".$vehiculo.",'".$tipo."','".$parte."')";
+	  $query = "CALL listar_partes_de_partes(".$vehiculo.",".$parte.",".$tipo.")";
 	  
 	  $result = executeQuery($query);
 	   $tabla= "";	
-	   
-	while($row = mysql_fetch_array($result))
-	  {
-		$tabla=$tabla."<tr><td>". 
-		$row["idPartes"] . "</td><td>".$row["nombre"]."</td>";
-			$tabla=$tabla."<td><button class=\"addParte\">Añadir Parte</button></td>";
-			$tabla=$tabla."</tr>";	
-				
-	  }
-	 	
+	 if(!empty($result)){
+		while($row = mysql_fetch_array($result))
+		  {
+			$tabla=$tabla."<tr><td>". 
+			$row["idpartes"] . "</td><td>".$row["nombre"]."</td>";
+				$tabla=$tabla."<td><button class=\"addParte\">Añadir Parte</button></td>";
+				$tabla=$tabla."</tr>";	
+					
+		  }
+	 	//echo $query;
 	 echo $tabla;
-
+	   }
+	//echo $query;
 	  return;
 }
+
+
 
 function cargarComboBoxVehiculos(){
 	$query = "CALL listar_vehiculos()";
 	$result = executeQuery($query);
+	$opciones="";
 	while($row = mysql_fetch_array($result))
 	  {
 		   $opciones.='<option value="'.$row["idInterno"].'">'.$row["idInterno"].'</option>';
@@ -227,11 +271,59 @@ function getVehiculo(){
 }
 
 
+function getPartesPorMantenimiento(){
+	$idMantenimiento=$_POST["idMantenimiento"];
+	$query = "CALL listar_partes_por_mantenimiento('".$idMantenimiento."')";
+	$result = executeQuery($query);
+	$row = mysql_fetch_array($result);
+	 while($row = mysql_fetch_array($result))
+	{
+		
+		$idPartes=$row["idpartes"];
+		$partesIdPartes=$row["partes_idpartes"];  
+		$nombre=$row["nombre"];
+		$tipo=$row["tipo"];		
+		
+		$parte=array("idPartes"=>$idPartes,"partesIdPartes"=>$partesIdPartes,"vehiculo"=>$vehiculo,"nombre"=>$nombre,"tipo"=>$tipo,"kmInicial"=>$kmInicial,"kmFinal"=>$kmFinal,"fechaInicial"=>$fechaInicial,"fechaVencimiento"=>$fechaProxima,"descripcion"=>$descripcion,"especificaciones"=>$especificaciones);
+		array_push($partes,$parte);
+		
+		  
+	}
+	
+	echo json_encode($partes);	
+	
+}
+
+function getMantenimiento(){
+	$idMantenimiento=$_POST["idMantenimiento"];
+	$query = "CALL buscar_mantenimiento('".$idMantenimiento."')";
+	$result = executeQuery($query);
+	$row = mysql_fetch_array($result);
+	
+	
+	$nombre=$row["nombre"];
+	$fechaInicio=$row["fechaInicio"];
+	$fechaFin=$row["fechaFin"];
+	$km=$row["km"];
+	$precio=$row["precio"];
+	$estado=$row["estado"];
+	$titulo=$row["titulo"];
+	$horas=$row["horas"];
+	$descripcion=$row["descripcion"];
+	
+	$mantenimiento=array("proveedor"=>$nombre,"fechaInicio"=>$fechaInicio,"fechaFin"=>$fechaFin,"km"=>$km,"precio"=>$precio,"estado"=>$estado,"titulo"=>$titulo,"horas"=>$horas,"descripcion"=>$descripcion);
+	
+	echo json_encode($mantenimiento);	
+	
+}
+
+
 function getVehiculosPorTipo(){
 	$tipo=$_POST["tipo"];
 	
 	$query = "CALL listar_vehiculos_por_tipo('".$tipo."');";
 	$result = executeQuery($query);
+	$opciones="";
 	 while($row = mysql_fetch_array($result))
 	  {
 		   $opciones.='<option value="'.$row["idInterno"].'">'.$row["idInterno"].'</option>';
@@ -257,8 +349,9 @@ function getKm(){
 }
 
 function cargarComboBoxTipos(){
-	$query = "CALL listar_tipos()";
+	$query = "CALL listar_tipos();";
 	$result = executeQuery($query);
+	$opciones="";
 	while($row = mysql_fetch_array($result))
 	  {
 		   $opciones.='<option value="'.$row["tipo"].'">'.$row["tipo"].'</option>';
@@ -272,6 +365,7 @@ function cargarComboBoxTipos(){
 function cargarComboBoxProveedores(){
 	$query = "call listar_proveedores();";
 	$result = executeQuery($query);	
+	$opciones="";
 	while($row = mysql_fetch_array($result))
 	  {
 		   $opciones.='<option value="'.$row["nombre"].'">';
@@ -315,8 +409,9 @@ function altaMantenimiento(){
 	  $precio=$_POST["precio"];
 	  $estado=$_POST["estado"];
 	  $vehiculo=$_POST["vehiculo"];
+	  $descripcion=$_POST["descripcion"];
 	
-	 $query = "CALL alta_mantenimiento('".$proveedor."','".$fechaInicio."','".$fechaFin."','".$km."','".$precio."','".$estado."','".$titulo."');";
+	 $query = "CALL alta_mantenimiento('".$proveedor."','".$fechaInicio."','".$fechaFin."','".$km."','".$precio."','".$estado."','".$titulo."','".$descripcion."');";
 	$result = executeQuery($query);
 	 $row = mysql_fetch_array($result);	 
 	 $nuevoId=$row["idMantenimiento"];
@@ -361,7 +456,15 @@ function executeQuery($query){
 	
 	//mysql_data_seek($result, 0);
 	//mysql_free_result ($result);
-	$link = @mysql_connect("localhost", "root","1234")
+	
+	$host = gethostbyaddr($_SERVER['REMOTE_ADDR']);
+	$str_datos = file_get_contents("datos.json");
+	$datos = json_decode($str_datos,true);
+	$dbPass=$datos[$host]["Pass"];
+	$user=$datos[$host]["User"];
+	
+	
+	$link = @mysql_connect("localhost",$user,$dbPass)
 		  or die ("Error al conectar a la base de datos.");
 	  @mysql_select_db("control_vehiculos", $link)
 		  or die ("Error al conectar a la base de datos.");

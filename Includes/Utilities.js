@@ -37,6 +37,7 @@ function loadTable(table,task,attr1,attr2,attr3){
 	dataType:"html",
 	data: {tarea:task,atributo1:attr1,atributo2:attr2,atributo3:attr3},
 	success: function(response) {
+		//$(table+'tr').remove();
 		$(table).after(response);
 	},
 	error: function(){
@@ -46,8 +47,9 @@ function loadTable(table,task,attr1,attr2,attr3){
 });
 }
 
-function loadComboFromDB(idComboBox,task){
-$(document).ready(function(e) {
+
+
+function loadComboFromDB(idComboBox,task,callBackFunction){
         
     
 	$.ajax({
@@ -57,13 +59,34 @@ $(document).ready(function(e) {
 	data: {tarea:task},
 	success: function(response) {
 		$(idComboBox).html(response);
+		callBackFunction();
 	},
 	error: function(){
 	alert('Error en combo');
 	}
 	});
-});	
+
 }
+
+function loadComboFromDBWithType(idComboBox,task,type,callBackFunction){
+        
+    
+	$.ajax({
+	url: 'Includes/FuncionesDB.php',
+	type: 'POST',
+	dataType:"html",
+	data: {tarea:task,tipo:type},
+	success: function(response) {
+		$(idComboBox).html(response);
+		callBackFunction();
+	},
+	error: function(){
+	alert('Error en combo');
+	}
+	});
+
+}
+
 
 function loadParts(tabla,id){
 	

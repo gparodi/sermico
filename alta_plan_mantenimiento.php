@@ -30,7 +30,8 @@
 <div class="container">
     
   <!-- InstanceBeginEditable name="EditRegion2" -->
-  
+<button type="button" id="boton"> Probar </button>
+
 <div id="filtros">Filtrar por:
 <select id="comboBoxFiltro"> </select>
 Vehiculo:
@@ -40,32 +41,31 @@ Vehiculo:
 
 
 
-<form id="formAltaMantenimiento" action="" title="" method="post">
+<form id="formAltaPlanMantenimiento" action="" title="" method="post">
 
- <li> <label> Proveedores</label>
- <input list="comboBoxProveedores" id="proveedores">
- <datalist id="comboBoxProveedores">
- </datalist>
- </li>
- 
- <li> <label>Titulo</label> 
+  
+ <li> <label>Titulo:</label> 
  <input type="text" id="titulo" placeholder="Cambio de aceite" required /> </li> 
- <li> <label>Fecha de Inicio</label> 
- <input type="date" id="fechaInicio" required /></li>
-  <li> <label>Fecha de Fin</label> 
-  <input type="date" id="fechaFin" required /></li> 
- <li> <label>Km</label> 
+ <h3> Criterio de mantenimiento </h3>
+ 
+<p>Por kilometros</p>
+ 
+ <li> <label>Kilometros:</label> 
  <input type="text" id="km"  /> </li> 
+ 
+ <p>Por tiempo</p>
+  <li> <label>Horas:</label> 
+ <input type="text" id="horas"  /> </li> 
+ 
+ <li> <label>Dias:</label> 
+ <input type="text" id="dias"  /> </li> 
+ 
+ <li> <label>Meses:</label> 
+ <input type="text" id="meses"  /> </li>
+ 
+ <li> <label>Años:</label> 
+ <input type="text" id="años"  /> </li>  
 
-<li> <label>Precio($)</label>
- <input type="text" id="precio" /> </li> 
- <li><label>Estado</label>
- <select  id="estados" > 
- <option>Realizado</option>
- <option>Programado</option>
- <option>En curso</option>
- </select>
- </li>
  
 <li><label>Descripcion:</label>
 <li><textarea id="descripcion" cols="60" row="20"></textarea></li>
@@ -77,9 +77,27 @@ Vehiculo:
 <script>
 $vehiculoActual=0;
 
+
+$("#boton").on("click",this,function(){
+	$.ajax({
+		url: 'Includes/mailSender.php',
+		type: 'POST',
+		dataType:"html",
+		data: {tarea:"getVehiculo"},
+		success: function(data) {
+			alert(data);
+		},
+		error: function(){
+		alert('Error en combo');
+		}
+		});
+	
+});
 		//loadTableFromDb("#tablaPartesDePartes","cargarTablaPartesDePartes",'1','parte','1');
 $(document).ready(function(e) {
-     
+     	
+
+
 
    
 loadComboFromDB("#comboBoxFiltro","cargarComboBoxTipos",function(){
@@ -91,10 +109,7 @@ loadComboFromDB("#comboBoxFiltro","cargarComboBoxTipos",function(){
 		dataType:"json",
 		data: {tarea:"getVehiculo",idVehiculo:$vehiculoActual},
 		success: function(data) {
-			if(data.km!=null)
-				$("#km").val(parseFloat(data.km));
-			else
-				$("#km").val("");
+				
 		},
 		error: function(){
 		alert('Error en combo');
@@ -120,10 +135,7 @@ $("#comboBoxFiltro").on("input",function(){
 		dataType:"json",
 		data: {tarea:"getVehiculo",idVehiculo:$vehiculoActual},
 		success: function(data) {
-			if(data.km!=null)
-				$("#km").val(parseFloat(data.km));
-			else
-				$("#km").val("");
+			
 		},
 		error: function(){
 		alert('Error en combo');
@@ -133,56 +145,15 @@ $("#comboBoxFiltro").on("input",function(){
 	
 });
 
-$("#comboBoxVehiculo").on("click",this,function(){
-	$vehiculoActual=$("#comboBoxVehiculo").val();
-			$.ajax({
-		url: 'Includes/FuncionesDB.php',
-		type: 'POST',
-		dataType:"json",
-		data: {tarea:"getVehiculo",idVehiculo:$vehiculoActual},
-		success: function(data) {
-			if(data.km!=null)
-				$("#km").val(parseFloat(data.km));
-			else
-				$("#km").val("");
-		},	
-		error: function(){
-		alert('Error en combo');
-		}
-		});	
-
-});
-
-
-//loadComboFromDB("#comboBoxVechiculoMantenimiento","cargarComboBoxVehiculos");
-loadComboFromDB("#comboBoxProveedores","cargarComboBoxProveedores");
-
-var now = new Date();
-
-var day = ("0" + now.getDate()).slice(-2);
-var month = ("0" + (now.getMonth() + 1)).slice(-2);
-
-var today = now.getFullYear()+"-"+(month)+"-"+(day) ;
-
-$('#fechaInicio').val(today);
-$('#fechaFin').val(today);
 
 
 
-//$("#submitMantenimiento").on("click",this,function(e){
-$("#formAltaMantenimiento").on("submit",this,function(e){	
+
+
+$("#formAltaPlanMantenimiento").on("submit",this,function(e){	
 e.preventDefault();
-var $idMantenimiento;
-var $proveedor=$("#proveedores").val();
-var $titulo=$("#titulo").val();
-var $fechaInicio=$("#fechaInicio").val();
-var $fechaFin=$("#fechaFin").val();
-var $km=$("#km").val();
-var $precio=$("#precio").val();
-var $estado=$("#estados").val();
-var $vehiculo=$("#comboBoxVehiculo").val();
-var $descripcion=$("#descripcion").val();
-///,titulo:$titulo,proveedor:$proveedor,fechaInicio:$fechaInicio,fechaFin:$fechaFin,km:$km,precio:$precio,estado:$estado	
+
+
 
 	$.ajax({
 	url: 'Includes/FuncionesDB.php',
@@ -217,18 +188,7 @@ var $descripcion=$("#descripcion").val();
 	
 });
 
- $("#proveedores").on("focusout",this,function(e){
-	var $proveedor=$(this).val();
-	if($proveedor!=""){
-		$.ajax({
-		url: 'Includes/FuncionesDB.php',
-		type: 'POST',
-		async:true,
-		dataType:'html',
-		data: {tarea:"altaProveedorSimple",nombre:$proveedor}
-		});
-	}
- });
+ 
  });
 </script>  
   

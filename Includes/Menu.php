@@ -15,8 +15,10 @@
     <li>
         <a href="vehiculos.php">Vehiculos</a>
         <ul>
-            <li><a href="#">Agregar</a></li>
+            <li><a href="alta_vehiculo.php">Nuevo vehiculo</a></li>
             <li><a href="actualizar_km.php">Actualizar KM</a></li>
+            <li><a href="alta_partes.php">Agregar Parte</a></li>
+            <li><a href=#>Documentacion</a></li>
         </ul>
     </li>
     <li><a href="mantenimiento.php">Mantenimiento</a>
@@ -26,10 +28,15 @@
         </ul>
     
     </li>
-    <li><a href="plan_mantenimiento.php">Plan de Mantenimiento</a></li>
-    <li><a href="#">Viajes</a>
+    <li><a href="plan_mantenimiento.php">Plan de Mantenimiento</a>
     	<ul>
-            <li><a href="alta_viajes.php">Alta</a></li>
+            <li><a href="alta_plan_mantenimiento.php">Nuevo plan</a></li>
+            
+     	</ul>
+     </li>
+    <li><a href="viajes.php">Viajes</a>
+    	<ul>
+            <li><a href="alta_viajes.php">Nuevo viaje</a></li>
             <li><a href="#">Historial</a></li>
             <li><a href="#">Control</a></li>
         </ul>

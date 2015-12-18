@@ -1,6 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:ice="http://ns.adobe.com/incontextediting"><!-- InstanceBegin template="/Templates/Template_Base.dwt.php" codeOutsideHTMLIsLocked="false" -->
 <head>
+<link rel="icon" type="image/x-icon" href="Imagenes/sermico.ico" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <!-- InstanceBeginEditable name="doctitle" -->
 <title>SERMICO SRL</title>
@@ -45,10 +46,10 @@
   <li> Lugar <input type="text" id="lugar" required /></li>
   <li> Forma de pago <input list="comboBoxFormasDePago" id="formaDePago">
  <datalist id="comboBoxFormasDePago">
- <option value="Efectivo">
- <option value="Cheque">
- <option value="Tarjeta">
- <option value="TicketCard">
+ <option>Efectivo</option>
+ <option>Cheque</option>
+ <option>Tarjeta</option>
+ <option>TicketCard</option>
  </datalist>
  </li>
   <li> Promedio por tramo (km/l)<input type="text" id="promedioParcial" readonly="readonly"/></li>

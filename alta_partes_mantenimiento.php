@@ -1,6 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:ice="http://ns.adobe.com/incontextediting"><!-- InstanceBegin template="/Templates/Template_Base.dwt.php" codeOutsideHTMLIsLocked="false" -->
 <head>
+<link rel="icon" type="image/x-icon" href="Imagenes/sermico.ico" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <!-- InstanceBeginEditable name="doctitle" -->
 <title>SERMICO SRL</title>
@@ -34,47 +35,53 @@
 
 
 <div id="tablaPartes">
+<h2>Partes del vehiculo</h2>
 <table id="tablaPartes"><tr>
 	<th>ID</th><th>Nombre</th>
 	</tr>
 </table>
 </div>
-<!--
+
 <div id="tablaPartesDePartes">
-<table id="tablaPartesDePartes"><tr><th>
-	<td>ID</td><td>Nombre</td></th>
+<h2>Partes que componen partes</h2>
+<table id="tablaPartesDePartes"><tr>
+	<th>ID</th><th>Nombre</th>
 	</tr>
-    </table>
+</table>
 </div>
--->
+
 
 <div id="tablaPartesMantenimientos">
+<h2>Partes incluidas en el mantenimiento</h2>
 <table id="tablaPartesMantenimientos"><tr>
 <th>ID</th><th>Nombre</th></tr>
 
 </table>
 </div>
 
-
-<div id="formularioMantenimientoPartes">
-
- <li> Parte:  <input type="text" id="parteSeleccionada"/> </li>
- <li> <label for="descripcion">Descripcion</label> <input type="text" id="descripcion"/> </li> 
- <li> <label for="observaciones">Observaciones</label> <input type="text" id="observaciones"></li>
-
-<li>Operacion
- <input list="operacion" id="operaciones">
- <datalist id="operacion">
- <option value="Reparacion">
- <option value="Cambio">
- <option value="Revision">
- </datalist>
- </li>
-<li> <button id="submitParte" type="submit">Cargar</button> </li>
+<h2>Descripcion del mantenimiento</h2>
+<form id="formAltaMatenimiento" action="" title="" method="post">
+ <li> <label>Parte:</label>
+ <input type="text" id="parteSeleccionada"/> </li>
+ <li><label>Operacion:</label>
+ <select id="operaciones"> 
+ <option>Reparacion</option>
+ <option>Cambio</option>
+ <option>Revision</option>
+  <option>Limpieza</option>
+ </select>
+ </li> 
  
-  </ul> 
+  <li>  <label>Descripcion:</label> </li>
+  <li>
+ <textarea id="descripcion" rows="10" cols="40"></textarea> </li> 
+ <li> <label>Observaciones:</label> </li>
+ <li> <textarea id="observaciones" rows="10" cols="40"></textarea></li>
 
-</div>
+
+<li> <button id="submitParte" type="submit">Cargar</button> 
+ <button id="submitFin" type="submit">Finalizar</button> </li>
+</form>
 
 
 
@@ -86,6 +93,9 @@
 <script>
 $vehiculoActual=localStorage['vehiculo'];
 $idMantenimiento=localStorage['idMantenimiento'];
+var idTablaPartes=[];
+var idTablaPartesDePartes=[];
+var idParteActual=0;
 $(document).ready(function(e) {
 	
     
@@ -106,6 +116,9 @@ $('#tablaPartesMantenimientos').on( 'click', 'td', function (e) {
 	jQuery.each($columns, function(i, item) {
 		if(i<=1){
         	values = item.innerHTML ;
+			if(i==0){
+				idParteActual=item.innerHTML;
+			}
 		}
 		
     });
@@ -115,13 +128,15 @@ $('#tablaPartesMantenimientos').on( 'click', 'td', function (e) {
 
 
 
-$("#submitParte").on("click",this,function(e){
-	
+$("#formAltaMatenimiento").on("submit",this,function(e){
+e.preventDefault();	
 
 var $descripcion=$("#descripcion").val();
 var $observacion=$("#observaciones").val();
 var $operacion=$("#operaciones").val();
 var $parte=$("#parteSeleccionada").val();
+
+if($parte!=null){
 
 $.ajax({
 	url: 'Includes/FuncionesDB.php',
@@ -131,66 +146,100 @@ $.ajax({
 	data: {tarea:"altaPartesMantenimiento",descripcion:$descripcion,observaciones:$observacion,idPartes:$parte,idMantenimiento:$idMantenimiento,operacion:$operacion,vehiculo:$vehiculoActual},
 	timeout:5000,
 	success: function(data, textStatus, jqXHR) {
-		
-		if (confirm('¿Desea cargar otro mantenimiento?')){ 
-       		$(location).attr('href','alta_mantenimiento.php');
-    	}else{
-			$(location).attr('href','mantenimiento.php');	
-		}
+		$("#tablaPartesMantenimientos").find("tr:contains("+idParteActual+")").remove();
 		
 		
-		 
+		$("#formAltaMatenimiento").each(function(index, element) {
+            this.reset();
+        });
+		
 	},
 	error: function( obj,text,error ){
 		alert(text);
 	}
 	});
+	
+}else{
+	alert("Seleccione una parte del vehiculo");
+}
 
 });
 
 
-/*
+$("#submitFin").on("click",this,function(e){
+	if (confirm('¿Desea cargar otro mantenimiento?')){ 
+    	$(location).attr('href','alta_mantenimiento.php');
+    }else{
+		$(location).attr('href','mantenimiento.php');	
+	}
+	
+});
+
+
+
  
 $('#tablaPartes').on( 'click', 'td', function (e) {
-	loadTable("#tablaPartesDePartes tr:last","cargarTablaPartesDePartes",$vehiculoActual,'parte',$(this).html().toString());
+	
+	var $idParte=$(this).closest('tr').find('td:eq(0)').html();
+
+	$.ajax({
+	url: 'Includes/FuncionesDB.php',
+	type: 'POST',
+	dataType:"html",
+	data: {tarea:'cargarTablaPartesDePartes',atributo1:$vehiculoActual,atributo2:'null',atributo3:$idParte},
+	success: function(response) {
+		$("#tablaPartesDePartes").find("tr:gt(0)").remove();
+		$("#tablaPartesDePartes tr:last").after(response);
+	},
+	error: function(){
+	alert('Error!');
+	}
+	});
+	
+	
+	/*
+	
+	
+	var $row = jQuery(this).closest('tr');
+    var $columns = $row.find('td');
+	var id;
+    var values = '<tr>';
+    jQuery.each($columns, function(i, item) {
+		if(i<=1){
+        	values = values +"<td>"+ item.innerHTML + "</td>" ;
+		}
+		if(i==0){
+				id=item.innerHTML;
+			}
+		
+    
+	});
+	
+	
+	
+	var  base=0,bandera=0;
+	$("#tablaPartesDePartes tr td").each(function (indice,elemento) {
+		if(base==indice){
+			if(id==elemento.innerHTML){
+				bandera=1;
+			}
+			base =parseInt(base)+3;
+		}
+	
+	});	
+	values +="<td><button class=\"deleteParte\">Quitar Parte</button></td>";
+	values += '</tr>';
+	if(bandera!=1){
+		$("#tablaPartesDePartes tr:last").after(values);
+	}
+	
+	
+	
+	loadTable("#tablaPartesDePartes tr:last","cargarTablaPartesDePartes",$vehiculoActual,'parte',$(this).html().toString());*/
 	 
 } );
 
 
-/*
-$("#mitabla1").on("click", ".addParte", function(){
-	
-	var $row = jQuery(this).closest('tr');
-    var $columns = $row.find('td');
-    var values = '<tr><td>';
-    
-    jQuery.each($columns, function(i, item) {
-        values = values + item.innerHTML ;
-    });
-	
-	values += '</tr>';
-	$("#mitabla2").append(values);
-	$(this).closest ('tr').remove ();
-});
-
-$("#mitabla2").on("click",".delete", function(){
-	
-	var $row = jQuery(this).closest('tr');
-    var $columns = $row.find('td');
-
-    var values = '<tr><td>';
-    
-    jQuery.each($columns, function(i, item) {
-        values = values + item.innerHTML ;
-    });
-	
-	values += '</tr>';
-	$("#mitabla1").append(values);
-	
-	
-	$(this).closest ('tr').remove ();
-});
-*/
 
 $("#tablaPartesDePartes").on("click", ".addParte", function(){
 	
@@ -201,6 +250,9 @@ $("#tablaPartesDePartes").on("click", ".addParte", function(){
     jQuery.each($columns, function(i, item) {
 		if(i<=1){
         	values = values +"<td>"+ item.innerHTML + "</td>" ;
+			if(i==0){
+				idTablaPartesDePartes.push(item.innerHTML);
+			}
 		}
 		
     });
@@ -223,6 +275,9 @@ $("#tablaPartes").on("click", ".addParte", function(){
 		if(i<=1){
         	values = values +"<td>"+ item.innerHTML + "</td>" ;
 		}
+		if(i==0){
+				idTablaPartes.push(item.innerHTML);
+			}
 		
     });
 	
@@ -236,24 +291,30 @@ $("#tablaPartesMantenimientos").on("click", ".deleteParte", function(){
 	
 	var $row = jQuery(this).closest('tr');
     var $columns = $row.find('td');
-
+	var idPartes=0;
+	
      var values = '<tr>';
     jQuery.each($columns, function(i, item) {
 		if(i<=1){
         	values = values +"<td>"+ item.innerHTML + "</td>" ;
+			if(i==0){
+				idPartes=item.innerHTML;
+			}
 		}
 		
     });
+	
 	values +="</td><td><button class=\"addParte\">Agregar Parte</button></td>";
 	values += '</tr>';
-	$("#tablaPartes tr:last").after(values);
+	if(idTablaPartesDePartes.indexOf(idPartes)==-1){
+		$("#tablaPartes tr:last").after(values);
+	}else{
+		$("#tablaPartesDePartes tr:last").after(values);
+	}
 	$(this).closest ('tr').remove ();
 });
 
   
-
-//deleteRow("#mitabla1","#mitabla2",".delete","#tablas");
-//addRowAtTableOnClick("#tablas","#mitabla",".add");
 
 </script>  
   
