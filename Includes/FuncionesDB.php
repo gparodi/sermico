@@ -454,9 +454,7 @@ function altaPartesMantenimiento(){
 
 function executeQuery($query){
 	
-	//mysql_data_seek($result, 0);
-	//mysql_free_result ($result);
-	
+		
 	$host = gethostbyaddr($_SERVER['REMOTE_ADDR']);
 	$str_datos = file_get_contents("datos.json");
 	$datos = json_decode($str_datos,true);

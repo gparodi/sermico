@@ -74,18 +74,23 @@ Vehiculo:
 
 </form>
 
+<div id="divPrueba">
+
+</div>
+
 <script>
 $vehiculoActual=0;
 
 
 $("#boton").on("click",this,function(){
 	$.ajax({
-		url: 'Includes/mailSender.php',
+		url: 'Includes/alertas.php',
 		type: 'POST',
 		dataType:"html",
 		data: {tarea:"getVehiculo"},
 		success: function(data) {
-			alert(data);
+			$("#divPrueba").empty();
+			$("#divPrueba").append(data);
 		},
 		error: function(){
 		alert('Error en combo');
