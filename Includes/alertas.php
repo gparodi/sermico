@@ -26,7 +26,14 @@
 				  
 			  }
 			  $plan=$listaplanes[$i];
-			  comprobarLista($partes,$plan);
+			  //ALERTAS
+			$query = "call buscar_alertas(".$listaplanes[$i]['idplanMantenimiento'].");";
+			$result = executeQuery($query);	
+			$k=0;
+			$alertas = mysql_fetch_array($result);
+						  
+			
+			 comprobarLista($partes,$plan,$alertas);
 			
 		}
 		  
@@ -37,7 +44,8 @@
 	
 	 
 	
-function comprobarLista($lista,$plan){
+function comprobarLista($lista,$plan,$alertas){
+	
 	$kmVehiculo=$plan['kmVehiculo'];
 	$kmPlan=$plan['km'];
 	$kmUltimo=$plan['ultimoKm'];
@@ -56,21 +64,37 @@ function comprobarLista($lista,$plan){
 	$diffAños=$interval->format('%y años');
 	
 	$flagAlerta=0;
+	$kmAntes=0;
+	$horasAntes=0;
+	$diasAntes=0;
+	$mesesAntes=0;
+	if(!empty($alertas)){
+		$kmAntes=$alertas['kmAntes'];
+		$horasAntes=$alertas['horasAntes'];
+		$diasAntes=$alertas['diasAntes'];
+		$mesesAntes=$alertas['mesesAntes'];
+		
+	}
+	echo $plan[1]."<br>";
+	echo $kmVehiculo-$kmUltimo."<br>";
+	echo $kmPlan-$kmAntes."<br>";
+	if(($kmVehiculo-$kmUltimo)>=($kmPlan-$kmAntes)){
+		$flagAlerta=1;
+	}
+	if($diasPlan!=""&&($diffDias>=($diasPlan-$diasAntes))){
+		$flagAlerta=1;
+	}
+	if($mesesPlan!=""&&($diffMeses>=($mesesPlan-$mesesAntes))){
+		$flagAlerta=1;
+	}
+	if($añosPlan!=""&&($diffAños>=$añosPlan)){
+		$flagAlerta=1;
+	}
 	
-	if(($kmVehiculo-$kmUltimo)>=$kmPlan){
-		$flagAlerta=1;
-		echo"km";
-	}
-	if($diffDias>=$diasPlan){
-		$flagAlerta=1;
-	}
-	if($diffMeses>=$mesesPlan){
-		$flagAlerta=1;
-	}
-	if($diffAños>=$añosPlan){
-		$flagAlerta=1;
-	}
+	
 	if($flagAlerta==1){
+		
+		
 		$flagAlerta=0;
 		$asunto="Mantenimiento de vehiculo numero: ".$plan['idInterno']." - ".$plan['marca']." ".$plan['modelo'];
 		

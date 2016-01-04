@@ -10,8 +10,9 @@
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
 <script type="text/javascript" src="Includes/JS_Cookies/jquery.cookie.js"></script>
-<script type="text/javascript" src="Includes/jquery-2.1.4.min.js"></script>
+<script type="text/javascript" src="Includes/js/jquery-2.1.4.min.js"></script>
 <script type="text/javascript" src="Includes/Utilities.js"></script>
+<script type="text/javascript" src="Includes/js/jquery.leanModal.min.js"></script>
 <link href="Estilos/estilo_Template.css" rel="stylesheet" type="text/css"/>
 </head>
 
@@ -70,8 +71,8 @@ Vehiculo:
 <li><label>Descripcion:</label>
 <li><textarea id="descripcion" cols="60" row="20"></textarea></li>
  
- <li> <button id="submitMantenimiento" type="submit" onclick="altaMantenimiento()">Agregar Mantenimiento</button> </li> </ul> 
-
+ <li> <button id="submitMantenimiento" type="submit" onclick="altaMantenimiento()">Agregar Mantenimiento</button> </li> 
+ 
 </form>
 
 <script>
@@ -169,7 +170,9 @@ $('#fechaFin').val(today);
 
 
 
-//$("#submitMantenimiento").on("click",this,function(e){
+
+	
+	
 $("#formAltaMantenimiento").on("submit",this,function(e){	
 e.preventDefault();
 var $idMantenimiento;
@@ -182,6 +185,8 @@ var $precio=$("#precio").val();
 var $estado=$("#estados").val();
 var $vehiculo=$("#comboBoxVehiculo").val();
 var $descripcion=$("#descripcion").val();
+
+
 ///,titulo:$titulo,proveedor:$proveedor,fechaInicio:$fechaInicio,fechaFin:$fechaFin,km:$km,precio:$precio,estado:$estado	
 
 	$.ajax({
@@ -195,18 +200,29 @@ var $descripcion=$("#descripcion").val();
 		
 		localStorage['vehiculo']=$vehiculo;
 		localStorage['idMantenimiento']=data.id;
-		/*
-		var persona = {
-   		 nombre: "pepe",
-    	 edad: 20,
-    	 locura: true
-		};
-		var personaAGuardar = JSON.stringify(persona);
-
-		localStorage.setItem("persona", personaAGuardar);*/
+		var $idMantenimiento=data.id;
 		
+		if (confirm('¿Desea agregar multiples tareas al mantenimiento?')){ 
+    		$(location).attr('href','alta_partes_mantenimiento.php');
+    	}else{
+			$.ajax({
+				url: 'Includes/FuncionesDB.php',
+				type: 'POST',
+				async:true,
+				dataType:'html',
+				data: {tarea:"altaPartesMantenimiento",descripcion:"",observaciones:"",idPartes:"-",idMantenimiento:$idMantenimiento,operacion:"",vehiculo:$vehiculo},
+				timeout:5000,
+				success: function(data, textStatus, jqXHR) {
+								
+					
+				},
+				error: function( obj,text,error ){
+					
+				}
+				});
+			$(location).attr('href','alta_mantenimiento.php');	
+		}
 		
-		$(location).attr('href','alta_partes_mantenimiento.php'); 
 	},
 	error: function( obj,text,error ){
 		alert(text);

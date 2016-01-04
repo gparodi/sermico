@@ -5,7 +5,8 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <!-- InstanceBeginEditable name="doctitle" -->
 <title>SERMICO SRL</title>
-
+ 
+ 
 <!-- InstanceEndEditable -->
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
@@ -31,66 +32,31 @@
 <div class="container">
     
   <!-- InstanceBeginEditable name="EditRegion2" -->
+
 <div id="filtros">Filtrar por:
 <select id="comboBoxFiltro"> </select>
 Vehiculo:
 <select id="comboBoxVehiculo">Vehiculo: </select>
 <p id="descripcionVehiculo"> </p>
 </div>
-  
-<h2>Mantenimientos realizados</h2>
+ 
 
 
-
-<table id="tablaMantenimientos"><tr>
-	<td>ID</td><td>Titulo</td><td>Proveedor</td><td>KM</td><td>Fecha de Inicio</td><td>Fecha de Fin</td><td>Horas</td><td>Precio($)</td><td>Estado</td>
-	</tr>
-    
-    </table>
-    
-
-
-
-
- <li><label>Proveedor:</label>
-<input type="text" id="proveedor" readonly="readonly"/></li>
-<li><label>Descripcion:</label></li>
-<li><textarea id="descripcion" cols="60" row="20" readonly="readonly"></textarea></li>
-
-
-<button id="botonDetalles" style="display:none"> Ver detalles </button>
-
-<div id="detallesMantenimiento" style="display:none">
-
-<div id="tablaPartesMantenimientos">
-<h2>Partes incluidas en el mantenimiento</h2>
-<table id="tablaPartesMantenimientos"><tr>
-<th>ID</th><th>Nombre</th></tr>
+<div>
+<table id="tablaDocumentacion">
+<th>ID</th><th>Nombre del documento</th><th>Otorgado</th><th>Vence</th><th>Descripcion</th>
 
 </table>
 </div>
 
-
-<h2>Descripcion del mantenimiento</h2>
- <li> <label>Parte:</label>
- <input type="text" id="parteSeleccionada"/> </li>
- <li><label>Operacion:</label>
- <input type="text" id="operacion"/> </li>
- 
-  <li>  <label>Descripcion:</label> </li>
-  <li>
- <textarea id="descripcion" rows="10" cols="40"></textarea> </li> 
- <li> <label>Observaciones:</label> </li>
- <li> <textarea id="observaciones" rows="10" cols="40"></textarea></li>
+<div id="prueba">
 
 </div>
 
-
-<script>
-
+ <script>
+ 
  //FILTRO
 var $vehiculoActual;
-var estadoDetalle=1;
 loadComboFromDB("#comboBoxFiltro","cargarComboBoxTipos",function(){
 	var $tipo=$("#comboBoxFiltro").val();
 	loadComboFromDBWithType("#comboBoxVehiculo","getVehiculosPorTipo",$tipo,function(){
@@ -109,7 +75,7 @@ $("#comboBoxFiltro").on("input",function(){
     var $tipo=$("#comboBoxFiltro").val();
 	loadComboFromDBWithType("#comboBoxVehiculo","getVehiculosPorTipo",$tipo,function(){
 	$vehiculoActual=$("#comboBoxVehiculo").val();
-	 loadTableFromDb("#tablaMantenimientos","cargarTablaMantenimiento",					$vehiculoActual);
+	 loadTable("#tablaDocumentacion tr:last","cargarTablaDocumentacion",$vehiculoActual,'Documentacion');
 	 sendAjaxJson({tarea:"getVehiculo",idVehiculo:$vehiculoActual},function(dato){
 		$("#descripcionVehiculo").empty();
 		$("#descripcionVehiculo").append(dato.marca + " " + dato.modelo +"/"+dato.año);
@@ -122,70 +88,73 @@ $("#comboBoxFiltro").on("input",function(){
 
 $("#comboBoxVehiculo").on("click",this,function(){
 	$vehiculoActual=$("#comboBoxVehiculo").val();
-	$("#tablaMantenimiento").find("tr:gt(0)").remove();
+	$("#tablaDocumentacion").find("tr:gt(0)").remove();
 	sendAjaxJson({tarea:"getVehiculo",idVehiculo:$vehiculoActual},function(dato){
 		$("#descripcionVehiculo").empty();
 		$("#descripcionVehiculo").append(dato.marca + " " + dato.modelo +"/"+dato.año);
 	});
-	loadTableFromDb("#tablaMantenimientos","cargarTablaMantenimiento",					$vehiculoActual);
+	
+	
+	 loadTable("#tablaDocumentacion tr:last","cargarTablaDocumentacion",$vehiculoActual,'Documentacion');
 });
 //---FIN FILTRO
+	
 
-
-$('#tablaMantenimientos').on( 'click', 'td', function (e) {
-	$("#descripcion").val("");
-	var $row = jQuery(this).closest('tr');
-    var $columns = $row.find('td');
-	jQuery.each($columns, function(i, item) {
-		if(i<=0){
-        	values = item.innerHTML ;
-			if(i==0){
-				idParteActual=item.innerHTML;
+    $("#tablaDocumentacion").on("dblclick","td",function () {
+		var th = $('#tablaDocumentacion th').eq($(this).index());
+    if(th.text()!="ID"){
+	var originalContent = $(this).text(); 
+	$(this).addClass("cellEditing"); 
+	$(this).html("<input type='text' value='" + originalContent + "' />"); 
+	$(this).children().first().focus(); 
+	$(this).children().first().keypress(function (e) { 
+		if (e.keyCode == 13) { 
+			var newContent = $(this).val(); 
+			$(this).parent().text(newContent);
+			$(this).parent().removeClass("cellEditing"); 
+			
+			if(originalContent!=newContent){
+				var $nombre;
+				var $descripcion;
+				var $fechaInicio;
+				var $fechaFin;
+				var $id;
+				$("#tablaDocumentacion td").each(function(index){
+					if(index==0){
+	                    $id=$(this).text();
+					}
+					if(index==1){
+	                    $nombre=$(this).text();
+					}
+					if(index==2){
+	                    $fechaInicio=$(this).text();
+					}
+					if(index==3){
+	                    $fechaFin=$(this).text();
+					}
+					if(index==4){
+	                    $descripcion=$(this).text();
+					}
+                });
+				var dato={tarea:"modificarDocumentacion",idParte:$id,nombre:$nombre,fechaInicial:$fechaInicio,fechaVencimiento:$fechaFin,descripcion:$descripcion};
+					$("#prueba").append(sendAjaxHtml(dato));
+				
+				
 			}
 		}
-		
-    });
-	
-	function detallesMantenimiento(data){
-		$("#descripcion").val(data.descripcion);
-		$("#proveedor").val(data.proveedor);		
-		//sendAjaxJson({tarea:'getPartesPorMantenimiento',idMantenimiento:"5"},verPartesPorMantenimiento);
-	}
-	function verPartesPorMantenimiento(data){
-		if(data){
-			$("#botonDetalles").css({'display':'block'});
-			
-			
-		}
-		
-		
+		}); 
+			$(this).children().first().blur(function(){ 
+				//$(this).parent().text(originalContent); 
+				$(this).parent().removeClass("cellEditing"); 
+			}); 
 	}
 	
-	sendAjaxJson({tarea:'getMantenimiento',idMantenimiento:values},detallesMantenimiento);
-	sendAjaxJson({tarea:'getPartesPorMantenimiento',idMantenimiento:values},verPartesPorMantenimiento);
+});
 	
-	$("#botonDetalles").on("click",this,function(){
-		if(estadoDetalle==1){
-			$("#detallesMantenimiento").css({'display':'block'});
-			estadoDetalle=0;
-			$(this).text("Ocultar detalles");
-		} else if(estadoDetalle==0){
-			$("#detallesMantenimiento").css({'display':'none'});
-			estadoDetalle=1;
-			$(this).text("Ver detalles");
-		}
-			
-		
-	});
-	
-	 
-} );
+
 
 
 </script>
-
-
-  
   
   <!-- InstanceEndEditable -->
   <div class="footer">

@@ -18,7 +18,7 @@
             <li><a href="alta_vehiculo.php">Nuevo vehiculo</a></li>
             <li><a href="actualizar_km.php">Actualizar KM</a></li>
             <li><a href="alta_partes.php">Agregar Parte</a></li>
-            <li><a href=#>Documentacion</a></li>
+            <li><a href="documentacion.php">Documentacion</a></li>
         </ul>
     </li>
     <li><a href="mantenimiento.php">Mantenimiento</a>

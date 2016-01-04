@@ -10,6 +10,41 @@ $(document).ready(function() {
 	});
 
 }
+
+function sendAjaxHtml(datos){
+	var respuesta="";
+	$.ajax({
+	url: 'Includes/FuncionesDB.php',
+	type: 'POST',
+	dataType:"html",
+	data: datos,
+	success: function(response) {
+		respuesta=response;
+	},
+	error: function(){
+	respuesta="ERROR";
+	}
+	});	
+	return respuesta;
+}
+
+function sendAjaxJson(datos,callBack){
+	$.ajax({
+	url: 'Includes/FuncionesDB.php',
+	type: 'POST',
+	dataType:"json",
+	data: datos,
+	success: function(response){
+		callBack(response);	
+		
+	},
+	error: function(){
+	alert('Error!');
+	}
+	});
+	
+}
+
 function loadTableFromDb(table,task,attr1,attr2,attr3){
 	$(document).ready(function(e) {    
     
@@ -19,7 +54,13 @@ function loadTableFromDb(table,task,attr1,attr2,attr3){
 	dataType:"html",
 	data: {tarea:task,atributo1:attr1,atributo2:attr2,atributo3:attr3},
 	success: function(response) {
-		$(table).html(response);
+		var tabla=table+" tr:last";
+		$(table +" tr").each(function(index, element) {
+            if(index!=0){
+				$(this).remove();
+			}
+        });;
+		$(tabla).after(response);
 	},
 	error: function(){
 	alert('Error!');

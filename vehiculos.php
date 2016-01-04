@@ -11,8 +11,9 @@
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
 <script type="text/javascript" src="Includes/JS_Cookies/jquery.cookie.js"></script>
-<script type="text/javascript" src="Includes/jquery-2.1.4.min.js"></script>
+<script type="text/javascript" src="Includes/js/jquery-2.1.4.min.js"></script>
 <script type="text/javascript" src="Includes/Utilities.js"></script>
+<script type="text/javascript" src="Includes/js/jquery.leanModal.min.js"></script>
 <link href="Estilos/estilo_Template.css" rel="stylesheet" type="text/css"/>
 </head>
 
@@ -32,19 +33,49 @@
     
   <!-- InstanceBeginEditable name="EditRegion2" -->
 
-<span>Filtrar por:
-<select id="comboBoxVechiculo"> </select>
+<div id="filtros">Filtrar por:
+<select id="comboBoxFiltro"> </select>
+Vehiculo:
+<select id="comboBoxVehiculo">Vehiculo: </select>
+</div>
 
-</span>  
- 
-<div id="tablaVehiculos">
+<div>
+<table id="tablaVehiculos">
+<th>Numero</th><th>Marca</th><th>Modelo</th><th>Patente</th><th>Año</th><th>Tipo</th><th>Kilometros</th><th>Estado</th>
 
+</table>
 </div>
 
 
  <script>
- loadComboFromDB("#comboBoxVechiculo","cargarComboBoxTipos");
-loadTableFromDb("#tablaVehiculos","cargarTablaVehiculos",null);
+ var $vehiculoActual;
+ //FILTRO
+loadComboFromDB("#comboBoxFiltro","cargarComboBoxTipos",function(){
+	var $tipo=$("#comboBoxFiltro").val();
+	loadComboFromDBWithType("#comboBoxVehiculo","getVehiculosPorTipo",$tipo,function(){
+	$vehiculoActual=$("#comboBoxVehiculo").val();
+	});
+	
+});
+
+$("#comboBoxFiltro").on("input",function(){
+	
+	
+    var $tipo=$("#comboBoxFiltro").val();
+	loadComboFromDBWithType("#comboBoxVehiculo","getVehiculosPorTipo",$tipo,function(){
+	$vehiculoActual=$("#comboBoxVehiculo").val();
+	 loadTable("#tablaVehiculos tr:last","cargarTablaVehiculos",$vehiculoActual,'');
+	});
+	
+});
+
+$("#comboBoxVehiculo").on("click",this,function(){
+	$vehiculoActual=$("#comboBoxVehiculo").val();
+	$("#tablaVehiculos").find("tr:gt(0)").remove();
+	 loadTable("#tablaVehiculos tr:last","cargarTablaDocumentacion",$vehiculoActual,'Documentacion');
+});
+
+ 
 </script>
   
   <!-- InstanceEndEditable -->

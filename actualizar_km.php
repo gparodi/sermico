@@ -11,8 +11,9 @@
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
 <script type="text/javascript" src="Includes/JS_Cookies/jquery.cookie.js"></script>
-<script type="text/javascript" src="Includes/jquery-2.1.4.min.js"></script>
+<script type="text/javascript" src="Includes/js/jquery-2.1.4.min.js"></script>
 <script type="text/javascript" src="Includes/Utilities.js"></script>
+<script type="text/javascript" src="Includes/js/jquery.leanModal.min.js"></script>
 <link href="Estilos/estilo_Template.css" rel="stylesheet" type="text/css"/>
 </head>
 
