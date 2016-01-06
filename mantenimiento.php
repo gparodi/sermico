@@ -43,17 +43,18 @@ Vehiculo:
 
 
 <table id="tablaMantenimientos"><tr>
-	<td>ID</td><td>Titulo</td><td>Proveedor</td><td>KM</td><td>Fecha de Inicio</td><td>Fecha de Fin</td><td>Horas</td><td>Precio($)</td><td>Estado</td>
+	<td>ID</td><td>Titulo</td><td>Proveedor</td><td>KM</td><td>Fecha de Inicio</td>
+    <td>Fecha de Fin</td><td>Horas</td><td>Precio($)</td><td>Estado</td>
 	</tr>
     
-    </table>
-    
+</table>
+
+<div id="prueba">
+
+</div>
 
 
-
-
- <li><label>Proveedor:</label>
-<input type="text" id="proveedor" readonly="readonly"/></li>
+<li><label>Proveedor:</label> <input type="text" id="proveedor" readonly="readonly"/></li>
 <li><label>Descripcion:</label></li>
 <li><textarea id="descripcion" cols="60" row="20" readonly="readonly"></textarea></li>
 
@@ -62,26 +63,19 @@ Vehiculo:
 
 <div id="detallesMantenimiento" style="display:none">
 
-<div id="tablaPartesMantenimientos">
 <h2>Partes incluidas en el mantenimiento</h2>
 <table id="tablaPartesMantenimientos"><tr>
-<th>ID</th><th>Nombre</th></tr>
-
+	<th>ID</th><th>Nombre</th></tr>
 </table>
-</div>
 
 
 <h2>Descripcion del mantenimiento</h2>
- <li> <label>Parte:</label>
- <input type="text" id="parteSeleccionada"/> </li>
- <li><label>Operacion:</label>
- <input type="text" id="operacion"/> </li>
- 
+ <li> <label>Parte:</label><input type="text" id="parteSeleccionada"/></li>
+ <li><label>Operacion:</label><input type="text" id="operacionParte"/></li> 
   <li>  <label>Descripcion:</label> </li>
-  <li>
- <textarea id="descripcion" rows="10" cols="40"></textarea> </li> 
+  <li><textarea id="descripcionParte" rows="10" cols="40"></textarea> </li> 
  <li> <label>Observaciones:</label> </li>
- <li> <textarea id="observaciones" rows="10" cols="40"></textarea></li>
+ <li> <textarea id="observacionesParte" rows="10" cols="40"></textarea></li>
 
 </div>
 
@@ -91,10 +85,12 @@ Vehiculo:
  //FILTRO
 var $vehiculoActual;
 var estadoDetalle=1;
+var datosPartes;
 loadComboFromDB("#comboBoxFiltro","cargarComboBoxTipos",function(){
 	var $tipo=$("#comboBoxFiltro").val();
 	loadComboFromDBWithType("#comboBoxVehiculo","getVehiculosPorTipo",$tipo,function(){
 	$vehiculoActual=$("#comboBoxVehiculo").val();
+	loadTableFromDb("#tablaMantenimientos","cargarTablaMantenimiento",$vehiculoActual);
 	sendAjaxJson({tarea:"getVehiculo",idVehiculo:$vehiculoActual},function(dato){
 		$("#descripcionVehiculo").empty();
 		$("#descripcionVehiculo").append(dato.marca + " " + dato.modelo +"/"+dato.año);
@@ -109,7 +105,7 @@ $("#comboBoxFiltro").on("input",function(){
     var $tipo=$("#comboBoxFiltro").val();
 	loadComboFromDBWithType("#comboBoxVehiculo","getVehiculosPorTipo",$tipo,function(){
 	$vehiculoActual=$("#comboBoxVehiculo").val();
-	 loadTableFromDb("#tablaMantenimientos","cargarTablaMantenimiento",					$vehiculoActual);
+	 loadTableFromDb("#tablaMantenimientos","cargarTablaMantenimiento",$vehiculoActual);
 	 sendAjaxJson({tarea:"getVehiculo",idVehiculo:$vehiculoActual},function(dato){
 		$("#descripcionVehiculo").empty();
 		$("#descripcionVehiculo").append(dato.marca + " " + dato.modelo +"/"+dato.año);
@@ -152,10 +148,28 @@ $('#tablaMantenimientos').on( 'click', 'td', function (e) {
 		//sendAjaxJson({tarea:'getPartesPorMantenimiento',idMantenimiento:"5"},verPartesPorMantenimiento);
 	}
 	function verPartesPorMantenimiento(data){
-		if(data){
-			$("#botonDetalles").css({'display':'block'});
 			
+		if(data.operacion=="OK"){
+			$("#botonDetalles").css({'display':'block'});		
+			$("#botonDetalles").text("Ver detalles");
+			var size=Object.keys(data).length;
+			datosPartes=data;
+			$("#tablaPartesMantenimientos tr").each(function(index, element) {
+                if(index!=0){
+					$(this).remove();	
+				}
+            });
+			$.each(data,function(index,element){
+				if(index<size){
+					
+					$("#tablaPartesMantenimientos tr:last").after("<tr><td>"+element.idPartes+"</td><td>"+element.nombre+"</td></tr>");
+				}
+			});
 			
+		}else{
+			
+			$("#botonDetalles").css({'display':'none'});
+			$("#detallesMantenimiento").css({'display':'none'});
 		}
 		
 		
@@ -165,7 +179,7 @@ $('#tablaMantenimientos').on( 'click', 'td', function (e) {
 	sendAjaxJson({tarea:'getPartesPorMantenimiento',idMantenimiento:values},verPartesPorMantenimiento);
 	
 	$("#botonDetalles").on("click",this,function(){
-		if(estadoDetalle==1){
+		if($("#botonDetalles").text()=="Ver detalles"){
 			$("#detallesMantenimiento").css({'display':'block'});
 			estadoDetalle=0;
 			$(this).text("Ocultar detalles");
@@ -178,6 +192,27 @@ $('#tablaMantenimientos').on( 'click', 'td', function (e) {
 		
 	});
 	
+	 
+} );
+
+$('#tablaPartesMantenimientos').on( 'click', 'td', function (e) {
+	var $row = jQuery(this).closest('tr');
+    var $columns = $row.find('td');
+	jQuery.each($columns, function(i, item) {
+		if(i<=1){
+        	values = item.innerHTML ;
+			if(i==0){
+				idParteActual=item.innerHTML;
+			}
+		}
+		
+    });
+	$("#parteSeleccionada").val(values.toString());
+	$.each(datosPartes,function(index,element){
+		if(element.idPartes==idParteActual){
+			$("#descripcionParte").val(element.descripcion);
+		}
+	});
 	 
 } );
 

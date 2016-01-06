@@ -34,6 +34,9 @@ case  'altaVehiculo':
 case 'cargarComboBoxTipos':
 		cargarComboBoxTipos();
 		break;
+case 'borrarVehiculo':
+		borrarVehiculo();
+		break;
 //-----FIN VEHICULOS
 //---------------- PARTES DE VEHICULOS---------------///
 
@@ -103,15 +106,15 @@ case 'altaProveedorSimple':
 //-------CARGAR TABLA VEHICULOS
 function cargarTablaVehiculos(){
 	
-	
-	  $query = "CALL listar_vehiculos()";
+	$tipo=$_POST["atributo1"];
+	  $query = "CALL listar_vehiculos('".$tipo."')";
 	  $result = executeQuery($query);
-	   $tabla="";
+	  $tabla="";
 	   
 	while($row = mysql_fetch_array($result))
 	  {
 		$tabla=$tabla."<tr><td>" . 
-			$row["numero"] . "</font></td>";
+			$row["idInterno"] . "</font></td>";
 		$tabla=$tabla. "<td>" . 
 			$row["marca"] . "</font></td>";
 		$tabla=$tabla. "<td>" . 
@@ -128,6 +131,9 @@ function cargarTablaVehiculos(){
 			$row["estado"] . "</font></td></tr>";
 		
 		
+	  }
+	  if($tabla==""){
+		  $tabla=$tabla."<tr ><td colspan=\"9\">No hay informacion para mostrar</td></tr>";
 	  }
 	 echo $tabla;		 	
 
@@ -196,11 +202,17 @@ function getVehiculo(){
 	$estado=$row["estado"];
 	$combustible=$row["combustible"];
 	$año=$row["año"];
+	$tipo=$row["tipo"];
+	$modeloMotor=$row["modeloMotor"];
+	$descripcion=$row["descripcion"];
+	$numeroDeChasis=$row["numero_de_chasis"];
+	$numeroMotor=$row["motor"];
 	$cobertura=$row["cobertura"];
-	$ot=$row["ot"];
 	$consumo=$row["consumo"];
+	$ot=$row["ot"];
 	
-	$vehiculo=array("numero"=>$numero,"idInterno"=>$idInterno,"marca"=>$marca,"modelo"=>$modelo,"patente"=>$patente,"km"=>$km,"estado"=>$estado,"combustible"=>$combustible,"año"=>$año,"cobertura"=>$cobertura,"ot"=>$ot,"consumo"=>$consumo);
+	
+	$vehiculo=array("numero"=>$numero,"idInterno"=>$idInterno,"marca"=>$marca,"modelo"=>$modelo,"patente"=>$patente,"km"=>$km,"estado"=>$estado,"combustible"=>$combustible,"año"=>$año,"tipo" =>$tipo, "modeloMotor"=>$modeloMotor, "descripcion"=>$descripcion, "numeroDeChasis"=>$numeroDeChasis, "numeroMotor"=>$numeroMotor, "cobertura" =>$cobertura, "consumo"=>$consumo, "ot"=>$ot);
 	
 	echo json_encode($vehiculo);
 	
@@ -226,7 +238,7 @@ function getVehiculosPorTipo(){
 function getKm(){
 	$vehiculo=$_POST["vehiculo"];
 	$query = "CALL buscar_vehiculo('".$vehiculo."')";
-	  $result = executeQuery($query);
+	$result = executeQuery($query);
 	   
 	   
 	$row = mysql_fetch_array($result);
@@ -249,6 +261,20 @@ function cargarComboBoxTipos(){
 	  echo $opciones;
 	  
 }
+
+function borrarVehiculo(){
+	$id=$_POST["idInterno"];
+	$query = "CALL borrar_vehiculo('".$id."')";	  
+	if($result = executeQuery($query)){
+		echo "El vehiculo fue eliminado con exito";	
+		
+	}else{
+		echo "No es posible borrar este vehiculo debido a que existen datos relacionados con el mismo. Por favor comuniquese con el administrador";
+		
+	}
+	
+}
+
 
 //-----FIN VEHICULOS
 
@@ -385,27 +411,40 @@ function cargarTablaMantenimiento($vehiculo){
 }
 
 function getPartesPorMantenimiento(){
+	$partes=array();
 	$idMantenimiento=$_POST["idMantenimiento"];
 	$query = "CALL listar_partes_por_mantenimiento('".$idMantenimiento."')";
 	$result = executeQuery($query);
-	$row = mysql_fetch_array($result);
-	$partes=array();
-	 while($row = mysql_fetch_array($result))
-	{
-		$nombre=$row["nombre"];
-			$idPartes=$row["idpartes"];
-			$partesIdPartes=$row["partes_idpartes"];  
-			
-			$tipo=$row["tipo"];		
-			
-			$parte=array("idPartes"=>$idPartes,"partesIdPartes"=>$partesIdPartes,"vehiculo"=>$vehiculo,"nombre"=>$nombre,"tipo"=>$tipo,"kmInicial"=>$kmInicial,"kmFinal"=>$kmFinal,"fechaInicial"=>$fechaInicial,"fechaVencimiento"=>$fechaProxima,"descripcion"=>$descripcion,"especificaciones"=>$especificaciones);
-			$partes[]=$parte;
-	}
+	if(mysql_num_rows($result)>0){
+	$partes["operacion"]="OK";
+		 while($row = mysql_fetch_array($result))
+		{
+				$nombre=$row["nombre"];
+				$idPartes=$row["idpartes"];
+				$partesIdPartes=$row["partes_idpartes"];			
+				$tipo=$row["tipo"];
+				$descripcion=$row["descripcion"];	
+				$operacion=$row["operacion"];	
+				$observaciones=$row["observaciones"];
+				
+				$parte=array("idPartes"=>$idPartes,"partesIdPartes"=>$partesIdPartes,"nombre"=>$nombre,"tipo"=>$tipo,"operacion"=>$operacion,"descripcion"=>$descripcion,"observaciones"=>$observaciones);
+				$partes[]=$parte;
+				
+		}
 		
-		  
+		if($nombre!="-"){
 	
-	
-	echo json_encode($partes);	
+			
+			echo json_encode($partes);
+		}else{
+			$respuesta=array("operacion"=>"NOK");
+			echo json_encode($respuesta);
+		}
+		//echo json_encode($parte);
+	}else{
+		$respuesta=array("operacion"=>"NOK");
+		echo json_encode($respuesta);
+	}
 	
 		
 	

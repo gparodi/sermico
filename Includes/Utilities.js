@@ -11,21 +11,21 @@ $(document).ready(function() {
 
 }
 
-function sendAjaxHtml(datos){
+function sendAjaxHtml(datos,callBack){
 	var respuesta="";
 	$.ajax({
 	url: 'Includes/FuncionesDB.php',
 	type: 'POST',
 	dataType:"html",
 	data: datos,
-	success: function(response) {
-		respuesta=response;
+	success: function(response){
+		callBack(response);	
+		
 	},
-	error: function(){
-	respuesta="ERROR";
+	error: function(jqXHR, textStatus, errorThrown){
+	alert(textStatus);
 	}
-	});	
-	return respuesta;
+	});
 }
 
 function sendAjaxJson(datos,callBack){
@@ -38,8 +38,8 @@ function sendAjaxJson(datos,callBack){
 		callBack(response);	
 		
 	},
-	error: function(){
-	alert('Error!');
+	error: function(jqXHR, textStatus, errorThrown){
+	alert(textStatus);
 	}
 	});
 	
@@ -59,7 +59,7 @@ function loadTableFromDb(table,task,attr1,attr2,attr3){
             if(index!=0){
 				$(this).remove();
 			}
-        });;
+        });
 		$(tabla).after(response);
 	},
 	error: function(){
@@ -171,6 +171,13 @@ $(table2Id).on("click",btnId, function(){
 	$(this).closest ('tr').remove ();
 });
 
+}
+
+
+function cleanForm(formId){
+	$(formId).each(function(index, element) {
+            this.reset();
+        });
 }
 
 

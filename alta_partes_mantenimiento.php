@@ -37,9 +37,11 @@
 
 <div id="tablaPartes">
 <h2>Partes del vehiculo</h2>
-<table id="tablaPartes"><tr>
-	<th>ID</th><th>Nombre</th>
-	</tr>
+<table id="tablaPartes"><thead><tr>
+	<th class="headcol">ID</th><th>Nombre</th><th>Operacion</th>
+	</tr></thead><tbody>
+    
+    </tbody>
 </table>
 </div>
 
@@ -149,10 +151,8 @@ $.ajax({
 	success: function(data, textStatus, jqXHR) {
 		$("#tablaPartesMantenimientos").find("tr:contains("+idParteActual+")").remove();
 		
+		cleanForm("#formAltaMatenimiento");
 		
-		$("#formAltaMatenimiento").each(function(index, element) {
-            this.reset();
-        });
 		
 	},
 	error: function( obj,text,error ){

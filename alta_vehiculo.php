@@ -91,10 +91,10 @@
 
 
 <li><label>Descripcion:</label></li>
-<li><textarea id="descripcion" cols="40" rows="5"></textarea>
+<li><textarea id="descripcion" cols="40" rows="5"></textarea></li>
 
 <li> <button id="submitParte" type="submit">Agregar</button> 
-</form></li>
+</li></form>
 
 <div id="result">
 
