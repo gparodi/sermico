@@ -95,9 +95,53 @@ case 'altaProveedorSimple':
 	  break;
 //-----FIN PROVEEDORES
 
+//----------------PLAN DE MANTENIMIENTO---------------///
+
+case 'listarPlanDeMantenimiento':listarPlanDeMantenimiento();
+		break;
+case 'getPlanDeMantenimiento': getPlanDeMantenimiento();
+	  break;
+//-----PLAN DE MANTENIMIENTO
+
+
 }
 		
+//----------------PLAN DE MANTENIMIENTO---------------///
 
+function listarPlanDeMantenimiento(){
+	$query = "CALL listar_planes_mantenimiento()";
+	  $result = executeQuery($query);
+	  $tabla="";
+	
+	while($row = mysql_fetch_array($result))
+	  {
+		$tabla=$tabla."<tr><td>". 
+			$row["idplanMantenimiento"]."</td>".
+			"<td>".$row["titulo"]."</td>".
+			"<td>".$row["km"]."</td>".
+			"<td>".$row["horas"]."</td>".
+			"<td>".$row["dias"]."</td>".
+			"<td>".$row["meses"]."</td>".
+			"<td>".$row["años"]."</td>".
+			"<td>".$row["descripcion"]."</td>".
+			"<td>".$row["estado"]."</td>";
+			$tabla=$tabla."</tr>";
+				
+	  }	
+	
+	if($tabla==""){
+		  $tabla=$tabla."<tr ><td colspan=\"9\">No hay informacion para mostrar</td></tr>";
+	  }
+	  
+	 echo $tabla;
+
+	  return;
+	
+}
+
+
+
+//-----PLAN DE MANTENIMIENTO
 
 
 

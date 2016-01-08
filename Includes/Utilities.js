@@ -54,13 +54,14 @@ function loadTableFromDb(table,task,attr1,attr2,attr3){
 	dataType:"html",
 	data: {tarea:task,atributo1:attr1,atributo2:attr2,atributo3:attr3},
 	success: function(response) {
-		var tabla=table+" tr:last";
+		
 		$(table +" tr").each(function(index, element) {
             if(index!=0){
 				$(this).remove();
 			}
         });
-		$(tabla).after(response);
+		var tabla=table+" tr:last";
+		$(table + " > tbody:last").append(response);
 	},
 	error: function(){
 	alert('Error!');

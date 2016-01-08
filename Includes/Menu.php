@@ -38,7 +38,7 @@
     	<ul>
             <li><a href="alta_viajes.php">Nuevo viaje</a></li>
             <li><a href="#">Historial</a></li>
-            <li><a href="#">Control</a></li>
+            <li><a href="alta_historial_viajes.php">Control</a></li>
         </ul>
     </li>    
     <li><a href="#">Conductores</a>	

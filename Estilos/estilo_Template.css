@@ -118,20 +118,21 @@ ul.nav a:hover, ul.nav a:active, ul.nav a:focus { /* esto cambia el color de fon
 }
 
 
-table{  
-    border-spacing: 0;  
-    display: flex;/*Se ajuste dinamicamente al tamano del dispositivo**/  
-    max-height: 40vh; /*El alto que necesitemos**/  
+
+
+
+  table{  
+    border-spacing: 0; 
+    display: block;  
+    max-height: 35vh; /*El alto que necesitemos**/  
     overflow-y: scroll; /**El scroll verticalmente cuando sea necesario*/  
     overflow-x: hidden;/*Sin scroll horizontal*/  
-    table-layout: fixed;/**Forzamos a que las filas tenga el mismo ancho**/  
+    table-layout: fixed;/**Forzamos a que las filas tenga el mismo ancho**/
     width: auto; /*El ancho que necesitemos*/  
     border:1px solid black;
-	padding-top:10px;
-	margin-top:10px;  
+	  
 }  
-
- 
+  
   
  table th{  
     font-weight:normal; 
@@ -145,7 +146,7 @@ table{
 	background: #b9c9fe;
     border-top: 4px solid #aabcfe;    
 	border-bottom: 1px solid #fff; 
-	color: #039;  
+	color: #039;
 } 
 
 td {   
@@ -157,7 +158,8 @@ td {
 	text-align:left;
 }
 
-tr:hover td { background: #d0dafd; color: #339; } 
+
+tbody tr:hover:not(.seleccionFila)  td { background: #d0dafd; color: #339; } 
 
 
 #filtros{
@@ -227,8 +229,8 @@ form{
 	z-index: 1000;
 }
 
-.seleccionFila{
- 	background-color:#ffccee;	
+.seleccionFila td{
+ 	background-color:#FF0000;	
 	
 }
 
