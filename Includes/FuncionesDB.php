@@ -37,6 +37,9 @@ case 'cargarComboBoxTipos':
 case 'borrarVehiculo':
 		borrarVehiculo();
 		break;
+case 'modificarVehiculo':
+		modificarVehiculo();
+		break;
 //-----FIN VEHICULOS
 //---------------- PARTES DE VEHICULOS---------------///
 
@@ -101,12 +104,41 @@ case 'listarPlanDeMantenimiento':listarPlanDeMantenimiento();
 		break;
 case 'getPlanDeMantenimiento': getPlanDeMantenimiento();
 	  break;
+case 'listarVehiculosPorPlanDeMantenimiento':listarVehiculosPorPlanDeMantenimiento();
+		break;
+case 'listar_tareas_por_planmantenimiento':listar_tareas_por_planmantenimiento();
+		break;
+		
+case 'altaTarea':altaTarea();
+		break;
 //-----PLAN DE MANTENIMIENTO
 
 
 }
 		
 //----------------PLAN DE MANTENIMIENTO---------------///
+
+function altaTarea(){
+	
+	$idPlanMantenimiento=$_POST["idPlanMantenimiento"];
+	$idPlanMantenimiento=$_POST[""];
+	$idPlanMantenimiento=$_POST["idPlanMantenimiento"];
+	$idPlanMantenimiento=$_POST["idPlanMantenimiento"];
+
+	$query = "CALL alta_vehiculo('".$numero."','".$patente."','".$marca."','".$modelo."','".$año."',null".",'".$motor."','".$chasis."','".$modeloMotor."','".$ot."','".$tipo."','".$combustible."','".$descripcion."','".$consumo."','".$km."');";
+	$result = executeQuery($query);  
+	echo $query; 
+	if($row = mysql_fetch_array($result)){
+		echo $row["resultado"];
+	}else{
+		echo "Error";
+	}
+	
+	
+}
+
+	
+
 
 function listarPlanDeMantenimiento(){
 	$query = "CALL listar_planes_mantenimiento()";
@@ -139,6 +171,88 @@ function listarPlanDeMantenimiento(){
 	
 }
 
+function getPlanDeMantenimiento(){
+	$idPlan=$_POST["idPlanMantenimiento"];
+	$query = "CALL buscar_planmantenimiento('".$idPlan."')";
+	$result = executeQuery($query);
+	$row = mysql_fetch_array($result);
+	
+	$idPlanMantenimiento=$row["idplanMantenimiento"];
+	$titulo=$row["titulo"];
+	$km=$row["km"];
+	$horas=$row["horas"];
+	$dias=$row["dias"];
+	$meses=$row["meses"];
+	$años=$row["años"];
+	$descripcion=$row["descripcion"];
+	$ultimoVencimiento=$row["ultimoVencimiento"];
+	$estado=$row["estado"];
+	
+	
+	
+	
+	$planMantenimiento=array("idPlanMantenimiento"=>$idPlanMantenimiento, "titulo"=>$titulo, "km"=>$km, "horas"=>$horas, "dias"=>$dias, "meses"=>$meses, "años"=>$años, "descripcion"=>$descripcion, "ultimoVencimiento"=>$ultimoVencimiento, "estado"=>$estado);
+	
+	echo json_encode($planMantenimiento);
+	
+}
+
+function listarVehiculosPorPlanDeMantenimiento(){
+	$tipo=$_POST["atributo1"];
+	  $query = "CALL listar_vehiculos_por_plan('".$tipo."')";
+	  $result = executeQuery($query);
+	  $tabla="";
+	   
+	while($row = mysql_fetch_array($result))
+	  {
+		$tabla=$tabla."<tr><td>" . 
+			$row["idInterno"] . "</td>";
+		$tabla=$tabla. "<td>" . 
+			$row["marca"] . "</td>";
+		$tabla=$tabla. "<td>" . 
+			$row["modelo"] . "</td>";
+		$tabla=$tabla. "<td>" . 
+			$row["año"] . "</td>"."</tr>";
+		
+		
+	  }
+	  if($tabla==""){
+		  $tabla=$tabla."<tr ><td colspan=\"9\">No hay informacion para mostrar</td></tr>";
+	  }
+	 echo $tabla;		 	
+
+	  return;
+	
+}
+
+function listar_tareas_por_planmantenimiento(){
+	
+	$idPlan=$_POST["atributo1"];
+	  $query = "CALL listar_tareas_por_planmantenimiento('".$idPlan."')";
+	  $result = executeQuery($query);
+	  $tabla="";
+	   
+	while($row = mysql_fetch_array($result))
+	  {
+		$tabla=$tabla."<tr><td>" . 
+			$row["idtareas"] . "</td>";
+		$tabla=$tabla. "<td>" . 
+			$row["titulo"] . "</td>";
+		$tabla=$tabla. "<td>" . 
+			$row["operacion"] . "</td>";
+		$tabla=$tabla. "<td>" . 
+			$row["descripcion"] . "</td>"."</tr>";
+		
+		
+	  }
+	  if($tabla==""){
+		  $tabla=$tabla."<tr ><td colspan=\"9\">No hay informacion para mostrar</td></tr>";
+	  }
+	 echo $tabla;		 	
+
+	  return;
+	
+}
 
 
 //-----PLAN DE MANTENIMIENTO
@@ -201,10 +315,14 @@ function altaVehiculo(){
 	 $patente=$_POST["patente"];
 	 $chasis=$_POST["chasis"];
 
-	$query = "CALL alta_vehiculo('".$numero."','".$patente."','".$marca."','".$modelo."','".$año."',null".",'".$motor."','".$chasis."','".$modeloMotor."','".$ot."','".$tipo."');";
-	echo $query;
-	$result = executeQuery($query);   
-	//$row = mysql_fetch_array($result);
+	$query = "CALL alta_vehiculo('".$numero."','".$patente."','".$marca."','".$modelo."','".$año."',null".",'".$motor."','".$chasis."','".$modeloMotor."','".$ot."','".$tipo."','".$combustible."','".$descripcion."','".$consumo."','".$km."');";
+	$result = executeQuery($query);  
+	echo $query; 
+	if($row = mysql_fetch_array($result)){
+		echo $row["resultado"];
+	}else{
+		echo "Error";
+	}
 	
 	
 }
@@ -259,6 +377,34 @@ function getVehiculo(){
 	$vehiculo=array("numero"=>$numero,"idInterno"=>$idInterno,"marca"=>$marca,"modelo"=>$modelo,"patente"=>$patente,"km"=>$km,"estado"=>$estado,"combustible"=>$combustible,"año"=>$año,"tipo" =>$tipo, "modeloMotor"=>$modeloMotor, "descripcion"=>$descripcion, "numeroDeChasis"=>$numeroDeChasis, "numeroMotor"=>$numeroMotor, "cobertura" =>$cobertura, "consumo"=>$consumo, "ot"=>$ot);
 	
 	echo json_encode($vehiculo);
+	
+}
+
+function modificarVehiculo(){
+	$idInterno=$_POST["idInterno"];
+	$numero=$_POST["numero"];
+	 $año=$_POST["año"];
+	 $combustible=$_POST["combustible"];
+	 $consumo=$_POST["consumo"];
+	 $descripcion=$_POST["descripcion"];
+	 $km=$_POST["km"];
+	 $marca=$_POST["marca"];
+	 $modelo=$_POST["modelo"];
+	 $modeloMotor=$_POST["modeloMotor"];
+	 $motor=$_POST["motor"];
+	 $ot=$_POST["ot"];
+	 $patente=$_POST["patente"];
+	 $chasis=$_POST["chasis"];
+
+	$query = "CALL modificar_vehiculo('".$idInterno."','".$numero."','".$patente."','".$marca."','".$modelo."','".$año."',null".",'".$motor."','".$chasis."','".$modeloMotor."','".$ot."','".$combustible."','".$descripcion."','".$consumo."','".$km."');";
+	$result = executeQuery($query);  
+	echo $query; 
+	if($row = mysql_fetch_array($result)){
+		echo $row["resultado"];
+	}else{
+		echo "Error";
+	}
+	
 	
 }
 
@@ -630,21 +776,83 @@ function executeQuery($query){
 	
 		
 	$host = gethostbyaddr($_SERVER['SERVER_ADDR']);
+	$ip_cliente="";
+	if (isset($_SERVER["HTTP_CLIENT_IP"]))
+    {
+        $ip_cliente= $_SERVER["HTTP_CLIENT_IP"];
+    }
+    elseif (isset($_SERVER["HTTP_X_FORWARDED_FOR"]))
+    {
+        $ip_cliente= $_SERVER["HTTP_X_FORWARDED_FOR"];
+    }
+    elseif (isset($_SERVER["HTTP_X_FORWARDED"]))
+    {
+        $ip_cliente= $_SERVER["HTTP_X_FORWARDED"];
+    }
+    elseif (isset($_SERVER["HTTP_FORWARDED_FOR"]))
+    {
+        $ip_cliente= $_SERVER["HTTP_FORWARDED_FOR"];
+    }
+    elseif (isset($_SERVER["HTTP_FORWARDED"]))
+    {
+        $ip_cliente= $_SERVER["HTTP_FORWARDED"];
+    }
+    else
+    {
+        $ip_cliente= $_SERVER["REMOTE_ADDR"];
+    }
+	$prefijo_ip=strchr($ip_cliente,".",true);
+	$tipo_ip="";
+	if($prefijo_ip==""){
+		$tipo_ip="localhost";
+	}
+	if($prefijo_ip=="192"||$prefijo_ip=="10"||$prefijo_ip=="172"){
+		$tipo_ip="privada";
+	}else{
+		$tipo_ip="publica";
+	}
+	if($tipo_ip=="publica"){
+		session_start();
+		
+		if(!isset($_SESSION[$ip_cliente])){
+			
+			$jsonData = file_get_contents(				"http://api.ipinfodb.com/v3/ip-city/?key=d0562b866396d2d2b8129e30ff3bf8c7e564a7b533b315f0e529113615fb909c&ip=".$ip_cliente."&format=json");
+				
+			$ubicacion_data = json_decode($jsonData,true);
+			if($ubicacion_data["cityName"]=="Neuquen"||$ubicacion_data["regionName"]=="Neuquen"){
+				echo ("Estas en Neuquen");
+				$dbname="control_vehiculos_nqn";
+				session_start();
+				$_SESSION[$ip_cliente]=$dbname;
+			
+		}else{
+			$dbname="control_vehiculos";
+			session_start();
+			$_SESSION[$ip_cliente]=$dbname;
+		}
+		
+	}else{
+		$stored_name=$_SESSION[$ip_cliente];
+		$dbname=$stored_name;
+	}
+	}else{
+		$dbname="control_vehiculos";
+	}
+	
 	$str_datos = file_get_contents("datos.json");
 	$datos = json_decode($str_datos,true);
 	$dbPass=$datos[$host]["Pass"];
 	$user=$datos[$host]["User"];
-	
+	//$dbname="control_vehiculos";
 	
 	$link = @mysql_connect("localhost",$user,$dbPass)
 		  or die ("Error al conectar a la base de datos.");
-	  @mysql_select_db("control_vehiculos", $link)
-		  or die ("Error al conectar a la base de datos.");
+	  @mysql_select_db($dbname, $link)
+		  or die ("Error al conectar a la base de datos");
 	
 	  $result = mysql_query($query);
 	  mysql_close($link);
-	  return $result;	
-	
+	  return $result;
 	
 }
 

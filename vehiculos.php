@@ -7,26 +7,25 @@
 <title>SERMICO SRL</title>
  
 <!-- InstanceEndEditable -->
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
-<script type="text/javascript" src="Includes/JS_Cookies/jquery.cookie.js"></script>
-<script type="text/javascript" src="Includes/js/jquery-2.1.4.min.js"></script>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+<script src="//code.jquery.com/jquery-1.10.2.js"></script>
+<script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
 <script type="text/javascript" src="Includes/Utilities.js"></script>
-<script type="text/javascript" src="Includes/js/jquery.leanModal.min.js"></script>
 <link href="Estilos/estilo_Template.css" rel="stylesheet" type="text/css"/>
+<link rel="stylesheet" href="Includes/Remodal-1.0.6/dist/remodal.css">
+<link rel="stylesheet" href="Includes/Remodal-1.0.6/dist/remodal-default-theme.css">
 </head>
 
-
+<script src="Includes/Remodal-1.0.6/dist/remodal.min.js"></script>
 <body>
 <div class="superior">
-<?php include("Includes/Cabecera.php"); ?>
-  <div class="header">
-    <div class="clearfloat"></div>
+
+
+
     <?php include("Includes/Menu.php"); ?>
     
     <!-- end .header -->
-  </div>
-
+  
 </div>
 <div class="container">
     
@@ -38,13 +37,13 @@
 </div>
 
 
-<div>
+
 <table id="tablaVehiculos"><thead><tr>
 <th>Numero</th><th>Marca</th><th>Modelo</th><th>Patente</th><th>Año</th><th>Tipo</th><th>Kilometros</th><th>Estado</th></tr></thead><tbody></tbody>
 
 
 </table>
-</div>
+
 
 <button id="botonDetalles"> Ver detalles </button>
 
@@ -66,15 +65,14 @@
 <li><label>Marca:</label>
 <input id="marca" type="text" /></li>
 
-<li><label>OT:</label>
-<input id="ot" type="text" /></li>
-
-
 <li><label>Modelo:</label>
 <input id="modelo" type="text" /></li>
 
 <li><label>Patente:</label>
-<input id="patente" type="text" /></li>
+<input id="patente" type="text" required="required" /></li>
+
+<li><label>OT:</label>
+<input id="ot" type="text" /></li>
 
 <li><label>Kilometros:</label>
 <input id="km" type="text" /></li>
@@ -92,7 +90,7 @@
 <input id="chasis" type="text" /></li>
 
 <li><label>Consumo promedio:</label>
-<input id="consumo" type="text" required="required" /></li>
+<input id="consumo" type="text"  /></li>
 
 <li><label>Combustible:</label>
 <select id="combustible">
@@ -104,10 +102,10 @@
 
 
 <li><label>Descripcion:</label></li>
-<li><textarea id="descripcion" cols="40" rows="5"></textarea></li>
-<li> <button id="btnNuevoVehiculo" type="button" style="display:none" value="btnNuevoVehiculo">Aceptar</button> 
+<li><textarea id="descripcion" ></textarea></li>
+<li> <button id="btnNuevoVehiculo" type="submit" style="display:none" value="btnNuevoVehiculo">Aceptar</button> 
 </li>
-<li> <button id="btnModificarVehiculo" type="button" style="display:none" value="btnModificarVehiculo">Aceptar</button> 
+<li> <button id="btnModificarVehiculo" type="submit" style="display:none" value="btnModificarVehiculo">Aceptar</button> 
 </li></form>
 </div>
 
@@ -120,7 +118,9 @@
         </ul>
 </div>
 
+<div id="prueba">
 
+</div>
 
  <script>
  var $vehiculoActual=0;
@@ -154,20 +154,28 @@ $("#tablaVehiculos").on("click",'tr',function() {
 
 $("#botonDetalles").on("click",this,function(){
 	
-	if($estadoDetalle==0){
-		
-		$(this).text("Ocultar detalle");
-		$("#detalleVehiculos").css({'display':'block'});
-		mostrarVehiculo();
-		$estadoDetalle=1;
-	}else{
-		$(this).text("Ver detalle");;
-		$("#detalleVehiculos").css({'display':'none'});
-		$estadoDetalle=0;
-	}
+	 mostrarDetalles();
 	
 });
 
+function mostrarDetalles(){
+	if($estadoDetalle==0){
+		$("#botonDetalles").text("Ocultar detalle");
+		$("#detalleVehiculos").toggle("slow");
+		$('html,body').animate({
+        scrollTop: $("#formVehiculo").offset().top
+    }, 2000);
+		mostrarVehiculo();
+		$estadoDetalle=1;
+	}else{
+		$("#botonDetalles").text("Ver detalle");
+		$('html,body').animate({
+        scrollTop: $("#formVehiculo").offset().top
+    }, 2000);
+		$("#detalleVehiculos").toggle("slow");
+		$estadoDetalle=0;
+	}
+}
 
 
 $('#tablaVehiculos').not("first").on( 'click', 'td', function (e) {
@@ -207,10 +215,11 @@ function mostrarVehiculo(){
 		$("#listaTipos").css({"display":"none"});
 		$("#btnModificarVehiculo").css({"display":"none"});
 		$("#btnNuevoVehiculo").css({"display":"none"});
+		$("#formVehiculo input").attr('readonly','readonly');
+			$("#formVehiculo textarea").attr('readonly','readonly');
 		sendAjaxJson({tarea:'getVehiculo',idVehiculo:$vehiculoActual},function(vehiculo){
 			
-			$("#formVehiculo input").attr('readonly','readonly');
-			$("#formVehiculo textarea").attr('readonly','readonly');
+			
 			$("#numero").val(vehiculo.idInterno);
 			$("#marca").val(vehiculo.marca);
 			$("#modelo").val(vehiculo.modelo);
@@ -235,7 +244,7 @@ function borrarVehiculo(){
 	
 	if($vehiculoActual!=0){
 		$estado="borrar";
-		if (confirm('¿Esra seguro que desea eliminar el vehiculo seleccionado?')){
+		if (confirm('¿Esta seguro que desea eliminar el vehiculo seleccionado?')){
 			sendAjaxHtml({tarea:'borrarVehiculo',idInterno:$vehiculoActual},function(datos){
 					alert(datos);
 					loadTableFromDb("#tablaVehiculos","cargarTablaVehiculos",$("#comboBoxFiltro").val());
@@ -250,10 +259,26 @@ function borrarVehiculo(){
 }
 
 function modificarVehiculo(){
-	$estado="modificar";
+	
+	if($("#detalleVehiculos").is(':visible')){
+		cleanForm("#formVehiculo");
+		mostrarVehiculo();
+	}else{
+		//$("#detalleVehiculos").css({'display':'block'});
+		$("#detalleVehiculos").toggle("slow");
+		mostrarVehiculo();
+	}
+	$('html,body').animate({
+        scrollTop: $("#formVehiculo").offset().top
+    }, 2000);
+	
 	$("#formVehiculo input").removeAttr('readonly');
 	$("#formVehiculo textarea").removeAttr('readonly');
+	$estado="modificar";
+	
+	$("#btnNuevoVehiculo").css({'display':'none'});
 	$("#btnModificarVehiculo").css({'display':'block'});
+	$("#listaTipos").css({'display':'none'});
 			
 	
 }
@@ -263,10 +288,18 @@ function nuevoVehiculo(){
 	if($("#detalleVehiculos").is(':visible')){
 		cleanForm("#formVehiculo");	
 	}else{
+		//mostrarDetalles();
 		$("#detalleVehiculos").css({'display':'block'});
+		$("#botonDetalles").css({'display':'none'});
 	}
-	$("#btnNuevoVehiculo").css({'display':'block'});
-	$("#listaTipos").css({'display':'block'});
+	$('html,body').animate({
+        scrollTop: $("#formVehiculo").offset().top
+    }, 2000);
+	$("#formVehiculo input").removeAttr('readonly');
+	$("#formVehiculo textarea").removeAttr('readonly');
+	$("#btnModificarVehiculo").css({'display':'none'});
+	$("#btnNuevoVehiculo").toggle("slow");
+	$("#listaTipos").toggle("slow");
 	$("#tipo").focus();
 	$estado="nuevo";
 	
@@ -326,15 +359,13 @@ function nuevoVehiculo(){
                    
             });
 			
-  
-             
- /*
+ 
+
   
  $("#formVehiculo").on("submit",this,function(e){
+	var datos;
 	e.preventDefault();
 	
-	alert($(this).attr('id'));
-	/*
 	var $tipo=$("#tipo").val();
 	var $numero=$("#numero").val();
 	var $año=$("#año").val();
@@ -350,25 +381,26 @@ function nuevoVehiculo(){
 	var $patente=$("#patente").val();
 	var $chasis=$("#chasis").val();
 	
-	var datos={tarea:"altaVehiculo",tipo:$tipo,numero:$numero,año:$año,combustible:$combustible,consumo:$consumo,descripcion:$descripcion,km:$km, marca:$marca, modelo:$modelo,modeloMotor:$modeloMotor, motor:$motor, ot:$ot, patente:$patente,chasis:$chasis};
-	$.ajax({
-	url: 'Includes/FuncionesDB.php',
-	type: 'POST',
-	async:true,
-	dataType:'html',
-	data: datos,
-	timeout:1000,
-	success: function(data, textStatus, jqXHR) {
-		$("#result").append(data);
-	},
-	error: function( obj,text,error ){
-		alert(text);
+	
+	
+	if($estado=="nuevo"){
+		datos={tarea:"altaVehiculo",tipo:$tipo,numero:$numero,año:$año,combustible:$combustible,consumo:$consumo,descripcion:$descripcion,km:$km, marca:$marca, modelo:$modelo,modeloMotor:$modeloMotor, motor:$motor, ot:$ot, patente:$patente,chasis:$chasis};
+	}else if($estado=="modificar"){
+		datos={tarea:"modificarVehiculo",idInterno:$vehiculoActual,numero:$numero,año:$año,combustible:$combustible,consumo:$consumo,descripcion:$descripcion,km:$km, marca:$marca, modelo:$modelo,modeloMotor:$modeloMotor, motor:$motor, ot:$ot, patente:$patente,chasis:$chasis};
 	}
+	sendAjaxHtml(datos,function(dato){
+		//$(location).attr('href','vehiculos.php');
+		//$("#prueba").empty();
+		//$("#prueba").append(dato);
+		loadTableFromDb("#tablaVehiculos","cargarTablaVehiculos",$("#comboBoxFiltro").val());
+		cleanForm("#formVehiculo");
+		mostrarVehiculo();
+		
+		
 	});
 	
 	
-	
-});  */                      
+});                       
    
 
 

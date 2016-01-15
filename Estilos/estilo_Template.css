@@ -118,18 +118,19 @@ ul.nav a:hover, ul.nav a:active, ul.nav a:focus { /* esto cambia el color de fon
 }
 
 
+/*--------------TABLAS-----------*/
 
 
-
-  table{  
+  table{
     border-spacing: 0; 
     display: block;  
     max-height: 35vh; /*El alto que necesitemos**/  
     overflow-y: scroll; /**El scroll verticalmente cuando sea necesario*/  
-    overflow-x: hidden;/*Sin scroll horizontal*/  
-    table-layout: fixed;/**Forzamos a que las filas tenga el mismo ancho**/
+    /*overflow-x: hidden;/*Sin scroll horizontal*/  
+  /*  table-layout: fixed;/**Forzamos a que las filas tenga el mismo ancho**/
     width: auto; /*El ancho que necesitemos*/  
     border:1px solid black;
+	margin: 20px;
 	  
 }  
   
@@ -159,9 +160,15 @@ td {
 }
 
 
-tbody tr:hover:not(.seleccionFila)  td { background: #d0dafd; color: #339; } 
+tbody tr:hover:not(.seleccionFila)  td {
+	background: #d0dafd;
+	color: #339;
+	cursor: pointer;
+	-webkit-transform: scale(1.03);
+    transform: scale(1.03);
+ } 
 
-
+/*------------FIN TABLAS */
 #filtros{
 	background: #eee url(arrow.png);
 	background-position: 280px center;
@@ -217,6 +224,11 @@ form{
       font-size: 16px;
       cursor:pointer;
 }
+
+.menuPopUp li:hover{
+	background-color: #2A0000;
+	color: #FFFBF0;	
+}
  
 .menuPopUp {
 	width: 250px;
@@ -233,6 +245,19 @@ form{
  	background-color:#FF0000;	
 	
 }
+button {
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    padding: 10px 27px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+}
+
 
 
 .editableTable { border:solid 1px; width:100% } 
@@ -241,3 +266,31 @@ form{
 .editableTable .cellEditing input[type=text]{ 
 width:100%; border:0; background-color:rgb(255,253,210); }
 
+
+
+/* Animacion de espera*/
+.modalWait {
+    display:    none;
+    position:   fixed;
+    z-index:    1000;
+    top:        0;
+    left:       0;
+    height:     100%;
+    width:      100%;
+    background: rgba( 255, 255, 255, .8 ) 
+                url('http://i.stack.imgur.com/FhHRx.gif') 
+                50% 50% 
+                no-repeat;
+}
+
+/* When the body has the loading class, we turn
+   the scrollbar off with overflow:hidden */
+body.loading {
+    overflow: hidden;   
+}
+
+/* Anytime the body has the loading class, our
+   modal element will be visible */
+body.loading .modalWait {
+    display: block;
+}

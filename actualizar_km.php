@@ -8,26 +8,25 @@
  
  
 <!-- InstanceEndEditable -->
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
-<script type="text/javascript" src="Includes/JS_Cookies/jquery.cookie.js"></script>
-<script type="text/javascript" src="Includes/js/jquery-2.1.4.min.js"></script>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+<script src="//code.jquery.com/jquery-1.10.2.js"></script>
+<script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
 <script type="text/javascript" src="Includes/Utilities.js"></script>
-<script type="text/javascript" src="Includes/js/jquery.leanModal.min.js"></script>
 <link href="Estilos/estilo_Template.css" rel="stylesheet" type="text/css"/>
+<link rel="stylesheet" href="Includes/Remodal-1.0.6/dist/remodal.css">
+<link rel="stylesheet" href="Includes/Remodal-1.0.6/dist/remodal-default-theme.css">
 </head>
 
-
+<script src="Includes/Remodal-1.0.6/dist/remodal.min.js"></script>
 <body>
 <div class="superior">
-<?php include("Includes/Cabecera.php"); ?>
-  <div class="header">
-    <div class="clearfloat"></div>
+
+
+
     <?php include("Includes/Menu.php"); ?>
     
     <!-- end .header -->
-  </div>
-
+  
 </div>
 <div class="container">
     
@@ -36,117 +35,86 @@
 <div id="filtros">Filtrar por:
 <select id="comboBoxFiltro"> </select>
 Vehiculo:
-<select id="comboBoxVehiculo"> </select>
+<select id="comboBoxVehiculo">Vehiculo: </select>
+<p id="descripcionVehiculo"> </p>
 </div>
  
 <div id="actulizarKm">
+<form id="formActualizarKm">
 <li> Km anterior: <input type="text"  id="kmAnterior" readonly="readonly"/> </li>
 <li> Km actual:  <input type="text" id="km"/> </li>
 <li> <button id="submitKm" type="submit">Aceptar</button> </li>
+</form>
 </div>
 
 
 
  <script>
+ 
+  //FILTRO
+var $vehiculoActual;
+loadComboFromDB("#comboBoxFiltro","cargarComboBoxTipos",function(){
+	var $tipo=$("#comboBoxFiltro").val();
+	loadComboFromDBWithType("#comboBoxVehiculo","getVehiculosPorTipo",$tipo,function(){
+	$vehiculoActual=$("#comboBoxVehiculo").val();
+	cargarKm()
+	sendAjaxJson({tarea:"getVehiculo",idVehiculo:$vehiculoActual},function(dato){
+		$("#descripcionVehiculo").empty();
+		$("#descripcionVehiculo").append(dato.marca + " " + dato.modelo +"/"+dato.año);
+	});
+	});
+	
+	
+});
+
+$("#comboBoxFiltro").on("input",function(){	
+	
+    var $tipo=$("#comboBoxFiltro").val();
+	loadComboFromDBWithType("#comboBoxVehiculo","getVehiculosPorTipo",$tipo,function(){
+	$vehiculoActual=$("#comboBoxVehiculo").val();
+	 cargarKm()
+	 sendAjaxJson({tarea:"getVehiculo",idVehiculo:$vehiculoActual},function(dato){
+		$("#descripcionVehiculo").empty();
+		$("#descripcionVehiculo").append(dato.marca + " " + dato.modelo +"/"+dato.año);
+	});
+	});
+	
+	
+	
+});
+
+$("#comboBoxVehiculo").on("click",this,function(){
+	$vehiculoActual=$("#comboBoxVehiculo").val();
+	$("#tablaMantenimiento").find("tr:gt(0)").remove();
+	sendAjaxJson({tarea:"getVehiculo",idVehiculo:$vehiculoActual},function(dato){
+		$("#descripcionVehiculo").empty();
+		$("#descripcionVehiculo").append(dato.marca + " " + dato.modelo +"/"+dato.año);
+	});
+	cargarKm()
+});
+//---FIN FILTRO
+ 
+
+function cargarKm(){
+	
+	
+	sendAjaxJson({tarea:"getVehiculo",idVehiculo:$vehiculoActual},function(data){
+		var kmAnterior=0;
+		if(data.km!=null){
+			kmAnterior=data.km;
+		}
+		$("#kmAnterior").val(kmAnterior);
+	});
+	
+	
+	
+}
+ 
+ 
  $(document).ready(function(e) {
     
 
-// loadComboFromDB("#comboBoxFiltro","cargarComboBoxTipos");
- 
- $.ajax({
-	url: 'Includes/FuncionesDB.php',
-	type: 'POST',
-	dataType:"html",
-	data: {tarea:"cargarComboBoxTipos"},
-	success: function(response) {
-		$("#comboBoxFiltro").html(response);
-		 var $tipo=$("#comboBoxFiltro").val();
 
- 
- 
-$.ajax({
-	url: 'Includes/FuncionesDB.php',
-	type: 'POST',
-	dataType:"html",
-	data: {tarea:"getVehiculosPorTipo",tipo:$tipo},
-	success: function(response) {
-		$("#comboBoxVehiculo").html(response);
-	},
-	error: function(){
-	alert('Error en combo');
-	}
-});	 
-	 
-	},
-	error: function(){
-	alert('Error en combo');
-	}
-	});
- 
-
-	 
-$("#comboBoxFiltro").on("input",function(){
-	
-    var $tipo=$("#comboBoxFiltro").val();
-	$.ajax({
-		url: 'Includes/FuncionesDB.php',
-		type: 'POST',
-		dataType:"html",
-		data: {tarea:"getVehiculosPorTipo",tipo:$tipo},
-		success: function(response) {
-			$("#comboBoxVehiculo").html(response);
-			 var $vehiculo=$("#comboBoxVehiculo").val();
-	 $.ajax({
-	url: 'Includes/FuncionesDB.php',
-	type: 'POST',
-	async:true,
-	dataType:'json',
-	data: {tarea:"getKm",vehiculo:$vehiculo},
-	timeout:5000,
-	success: function(data, textStatus, jqXHR) {
-		var kmAnterior=0;
-		if(data.km!=null){
-			kmAnterior=data.km;
-		}
-		$("#kmAnterior").val(kmAnterior);
-		 
-	},
-	error: function( obj,text,error ){
-		alert(text);
-	}
-	});
-		},
-		error: function(){
-		alert('Error en combo');
-		}
-	});	
-
-	
-});
-
-$("#comboBoxVehiculo").on("input",function(){
-	var $vehiculo=$("#comboBoxVehiculo").val();
-	 $.ajax({
-	url: 'Includes/FuncionesDB.php',
-	type: 'POST',
-	async:true,
-	dataType:'json',
-	data: {tarea:"getKm",vehiculo:$vehiculo},
-	timeout:5000,
-	success: function(data, textStatus, jqXHR) {
-		var kmAnterior=0;
-		if(data.km!=null){
-			kmAnterior=data.km;
-		}
-		$("#kmAnterior").val(kmAnterior);
-		$("#km").val("");
-	},
-	error: function( obj,text,error ){
-		alert(text);
-	}
-	});
-	
-});
 
 	 
  $("#submitKm").on("click",this,function(){
@@ -164,11 +132,9 @@ $("#comboBoxVehiculo").on("input",function(){
 			data: {tarea:"actulizarKm",vehiculo:$vehiculo,km:$kmActual},
 			timeout:5000,
 			success: function(data, textStatus, jqXHR) {
-				
+				cleanForm("#formActualizarKm");
 			},
-			error: function( obj,text,error ){
-				alert(text);
-			}
+			
 			});	
 	}
 	 

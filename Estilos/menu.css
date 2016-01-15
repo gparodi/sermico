@@ -5,12 +5,10 @@
 }
 
 #menu {
-    width: auto;
-    margin: 60px auto;
-    border: 1px solid #222;
+    width: 100%;
+    margin-bottom:10px;
     background-color: #111;
     background-image: linear-gradient(#444, #111);
-    border-radius: 6px;
     box-shadow: 0 1px 1px #777;
 	zoom:1;
 }
