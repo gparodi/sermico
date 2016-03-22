@@ -16,6 +16,7 @@ function sendAjaxHtml(datos,callBack){
 	$.ajax({
 	url: 'Includes/FuncionesDB.php',
 	type: 'POST',
+	timeout:8000,
 	dataType:"html",
 	data: datos,
 	success: function(response){

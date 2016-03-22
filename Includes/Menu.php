@@ -19,7 +19,7 @@
     </li>
     <li><a href="mantenimiento.php">Mantenimiento</a>
     	 <ul>
-            <li><a href="alta_mantenimiento.php">Cargar</a></li>
+            <li><a href="alta_mantenimiento.php">Nuevo</a></li>
             
         </ul>
     
@@ -30,7 +30,7 @@
             <li><a href="#">Alertas programadas</a></li>
      	</ul>
      </li>
-    <li><a href="viajes.php">Viajes</a>
+    <li><a href="prueba.php">Viajes</a>
     	<ul>
             <li><a href="alta_viajes.php">Nuevo viaje</a></li>
             <li><a href="#">Historial</a></li>

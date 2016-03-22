@@ -13,8 +13,7 @@
 <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
 <script type="text/javascript" src="Includes/Utilities.js"></script>
 <link href="Estilos/estilo_Template.css" rel="stylesheet" type="text/css"/>
-<link rel="stylesheet" href="Includes/Remodal-1.0.6/dist/remodal.css">
-<link rel="stylesheet" href="Includes/Remodal-1.0.6/dist/remodal-default-theme.css">
+
 </head>
 
 <script src="Includes/Remodal-1.0.6/dist/remodal.min.js"></script>
@@ -32,19 +31,18 @@
     
   <!-- InstanceBeginEditable name="EditRegion2" -->
 
-<span>Filtrar por:
-<select id="comboBoxVechiculo"> </select>
-
-</span>  
- 
-<div id="tablaVehiculos">
-
+<button id="btnPrueba" type="button"></button>
+<div id="prueba">
+ <?php include("Includes/alertas.php"); ?>
 </div>
 
-
  <script>
- loadComboFromDB("#comboBoxVechiculo","cargarComboBoxTipos");
-loadTableFromDb("#tablaVehiculos","cargarTablaVehiculos",null);
+ $("#btnPrueba").on("click",this,function(){
+    $("#prueba").remove();
+	sendAjaxHtml({tarea:"dos"},function(datos){
+		$("#prueba").append(datos);
+	});
+});
 </script>
   
   <!-- InstanceEndEditable -->

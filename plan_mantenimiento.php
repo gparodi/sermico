@@ -12,8 +12,7 @@
 <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
 <script type="text/javascript" src="Includes/Utilities.js"></script>
 <link href="Estilos/estilo_Template.css" rel="stylesheet" type="text/css"/>
-<link rel="stylesheet" href="Includes/Remodal-1.0.6/dist/remodal.css">
-<link rel="stylesheet" href="Includes/Remodal-1.0.6/dist/remodal-default-theme.css">
+
 </head>
 
 <script src="Includes/Remodal-1.0.6/dist/remodal.min.js"></script>
@@ -72,14 +71,14 @@
 <li><textarea id="descripcion" cols="40" rows="5"></textarea></li>
 
 <h2>Vehiculos incluidos en el plan de mantenimiento</h2>
-<table id="vehiculosPorPlan"><thead><tr>
+<table id="tablaVehiculosEnPlan"><thead><tr>
     <th>Numero</th><th>Marca</th><th>Modelo</th><th>Año</th>
     </tr></thead><tbody></tbody>
 
 </table>
 
 <h2>Tareas de plan de mantenimiento</h2>
-<table id="tareasPorPlan"><thead><tr>
+<table id="tablaTareasPorPlan"><thead><tr>
     <th>ID</th><th>Titulo</th><th>Operacion</th><th>Descripcion</th>
     </tr></thead><tbody></tbody>
 
@@ -93,22 +92,66 @@
 <li> <button id="btnModificarPlan" type="submit" style="display:none">Aceptar</button> 
 </li>
 
+
+<h2>Alertas</h2>
+
+<li><label>Km antes:</label>
+<input type="text" id="kmAntes" /></li>
+
+<li><label>Horas antes:</label>
+<input type="text" id="kmAntes" /></li>
+
+<li><label>Dias antes:</label>
+<input type="text" id="kmAntes" /></li>
+
+<li><label>Meses antes:</label>
+<input type="text" id="kmAntes" /></li>
+
 </form>
+<h3>Lista de distribucion </h3>
+
+<table id="tablaMails"><thead><tr>
+    <th>Mail</th>
+    </tr></thead><tbody></tbody>
+</table>
+
+
+
 </div>
 
 
-<div id="menuPop" class="menuPopUp" style="display:none">
+<div id="menuPopVehiculosPorPlan" class="menuPopUp" style="display:none">
       <ul>
-            <li id="nuevo">Nuevo</li>
-            <li id="eliminar">Eliminar</li>
             <li id="modificar">Modificar</li>
-            <li id="agregarParte">Agregar Parte/Accesorio</li>
         </ul>
 </div>
 
-<div id="modal">
+<div id="vehiculosPorPlan_Modal">
  	
 </div>
+
+
+<div id="menuPopPlanMantenimiento" class="menuPopUp" style="display:none">
+      <ul>
+            <li id="modificar">Modificar</li>
+        </ul>
+</div>
+
+
+<div id="menuPopTareasPorPlan" class="menuPopUp" style="display:none">
+      <ul>
+            <li id="modificar">Modificar</li>
+        </ul>
+</div>
+
+<div id="tareasPorPlan_Modal">
+ 	
+</div>
+
+
+
+
+
 
  <script>
 var $planActual;
@@ -120,20 +163,19 @@ var estadoModal;
 
 
 $("#btnDetalles").on("click",this,function(){
-         //mostrarDetalles();
-		 $('#modal').load('panel_vehiculos_planmantenimiento.php');
-		 $('#modal').dialog({
+         mostrarDetalles();
+		 /*$('#vehiculosPorPlan_Modal').load('panel_vehiculos_planmantenimiento.php');
+		 $('#vehiculosPorPlan_Modal').dialog({
 			 resizable: false,
 			  height:500,
 			  width:900,
 			  modal: true   
       		
-    	});
-		 loadTableFromDb("#vehiculosPorPlan1","listarVehiculosPorPlanDeMantenimiento",$planActual);
+    	});*/
+		 loadTableFromDb("#tablaVehiculosEnPlan","listarVehiculosPorPlanDeMantenimiento",$planActual);
 		// estadoModal.open();     
         
 });
-
 
 
 $('#tablaPlanMantenimiento').not("first").on( 'click', 'td', function (e) {
@@ -143,8 +185,9 @@ $('#tablaPlanMantenimiento').not("first").on( 'click', 'td', function (e) {
     jQuery.each($columns, function(i, item) {
         if(i==0){
             $planActual=item.innerHTML;
+			localStorage['planActual']=$planActual;
         }
-    });
+ });
     
     
         
@@ -169,6 +212,7 @@ $('#tablaPlanMantenimiento').not("first").on( 'click', 'td', function (e) {
     }
 });
 
+//re escribir
 $("#formPlanMantenimiento").on("submit",this,function(e){
     var datos;
     e.preventDefault();
@@ -193,12 +237,56 @@ $("#formPlanMantenimiento").on("submit",this,function(e){
 
 $(document).ready(function(e) {
     loadTableFromDb("#tablaPlanMantenimiento","listarPlanDeMantenimiento");
+	
+	
 });
 
 
 ///////////--------FIN EVENTOS
 
 ////////////-----------FUNCIONES ---------------////////
+
+
+function modificarVehiculosPorPlan(){
+	$('#vehiculosPorPlan_Modal').load('panel_vehiculos_planmantenimiento.php');
+		 $('#vehiculosPorPlan_Modal').dialog({
+			 resizable: false,
+			  height:500,
+			  width:900,
+			  modal: true,
+			  close: function(e,ui){
+				  loadTableFromDb("#tablaVehiculosEnPlan","listarVehiculosPorPlanDeMantenimiento",$planActual);
+				  
+			  }
+      		
+    	});
+		
+}
+
+function modificarTareasPorPlan(){
+	$('#tareasPorPlan_Modal').load('panel_tareas.php');
+		 $('#tareasPorPlan_Modal').dialog({
+			 resizable: false,
+			  height:500,
+			  width:900,
+			  modal: true,
+			  close: function(e,ui){
+					loadTableFromDb("#tablaTareasPorPlan","listar_tareas_por_planmantenimiento",$planActual);
+			  }
+      		
+    	});
+		
+}
+
+function cerrarModalTareas(){
+	$("#tareasPorPlan_Modal").dialog("close");
+}
+function cerrarModal(){
+	$("#vehiculosPorPlan_Modal").dialog("close");	
+	
+}
+
+
 
 function mostrarDetalles(){
         if($estadoDetalle==0){
@@ -215,6 +303,7 @@ function mostrarDetalles(){
 
 
 function mostrar(){
+	
         if($planActual!=0){
                 $estado="mostrar";
                 
@@ -231,11 +320,17 @@ function mostrar(){
                     $("#años").val(plan.años);
                     $("#descripcion").val(plan.descripcion);
                     $("#estado").val(plan.estado);
-                    loadTableFromDb("#vehiculosPorPlan","listarVehiculosPorPlanDeMantenimiento",$planActual);
-					loadTableFromDb("#tareasPorPlan","listar_tareas_por_planmantenimiento",$planActual);
-					 
+                    loadTableFromDb("#tablaVehiculosEnPlan","listarVehiculosPorPlanDeMantenimiento",$planActual);
+					loadTableFromDb("#tablaTareasPorPlan","listar_tareas_por_planmantenimiento",$planActual);
+					
+					
                         
                 });
+				sendAjaxJson({tarea:'getAlertas',idPlanMantenimiento:$planActual},function(alerta){
+					loadTableFromDb("#tablaMails","cargarTablaAlertasMail",$planActual);
+					$("#kmAntes").val(alerta.kmAntes);
+				});
+				
         }
         
         
@@ -315,62 +410,145 @@ function nuevo(){
 
 
 
-//////////----------POPUP MENU
+//////////----------POPUP MENU PLAN VEHICULOS
 
- $("#tablaPlanMantenimiento").bind("contextmenu", function(e){
-    $("#menuPop").css({'display':'block', 'left':e.pageX, 'top':e.pageY});
+ $("#tablaVehiculosEnPlan").bind("contextmenu", function(e){
+    $("#menuPopVehiculosPorPlan").css({'display':'block', 'left':e.pageX, 'top':e.pageY});
      return false;
  });
  
  //cuando hagamos click, el menú desaparecerá
 $(document).click(function(e){
     if(e.button == 0){
-        $("#menuPop").css({'display':'none'});
+        $("#menuPopVehiculosPorPlan").css({'display':'none'});
     }
 });
              
 //si pulsamos escape, el menú desaparecerá
 $(document).keydown(function(e){
     if(e.keyCode == 27){
-        $("#menuPop").css({'display':'none'});
+        $("#menuPopVehiculosPorPlan").css({'display':'none'});
     }
 });
 
 //controlamos los botones del menú
-$("#menuPop").click(function(e){
+$("#menuPopVehiculosPorPlan").click(function(e){
 
     // El switch utiliza los IDs de los <li> del menú
     switch(e.target.id){
 
-        case "eliminar":
-
-            borrar();
-        break;
-        case "nuevo":
-            if($estado=="nuevo"){
-            if(confirm("Los datos se perderan ¿desea continuar?")){
-            nuevo();
-            }
-            }else{
-            nuevo();
-
-            }
-        break;
+        
         case "modificar":
-            if($estado=="nuevo"){
-            if(confirm("Los datos se perderan ¿desea continuar?")){
-            modificar();
-            }
-            }else{
-            modificar();                                                                  
-            }
-
+            modificarVehiculosPorPlan()
         break;
     }
 
 });
                         
 ///////////-------- FIN POUP MENU
+
+
+
+
+
+//////////----------POPUP MENU PLAN MANTEMIENTO
+
+ $("#tablaPlanMantenimiento").bind("contextmenu", function(e){
+    $("#menuPopPlanMantenimiento").css({'display':'block', 'left':e.pageX, 'top':e.pageY});
+     return false;
+ });
+ 
+ //cuando hagamos click, el menú desaparecerá
+$(document).click(function(e){
+    if(e.button == 0){
+        $("#menuPopPlanMantenimiento").css({'display':'none'});
+    }
+});
+             
+//si pulsamos escape, el menú desaparecerá
+$(document).keydown(function(e){
+    if(e.keyCode == 27){
+        $("#menuPopPlanMantenimiento").css({'display':'none'});
+    }
+});
+
+//controlamos los botones del menú
+$("#menuPopPlanMantenimiento").click(function(e){
+
+    // El switch utiliza los IDs de los <li> del menú
+    switch(e.target.id){
+		case "eliminar":
+	
+        borrarVehiculo();
+        break;
+		case "nuevo":
+			if($estado=="nuevo"){
+			  if(confirm("Los datos se perderan ¿desea continuar?")){
+              	nuevoVehiculo();
+			  }
+			  }else{
+				nuevoVehiculo();
+								  
+				}
+              break;
+			case "modificar":
+				if($estado=="nuevo"){
+			  if(confirm("Los datos se perderan ¿desea continuar?")){
+            	   	modificarVehiculo();
+			  }
+			  }else{
+					 modificarVehiculo();
+								  
+				}
+                              
+                break;
+                  		
+    }
+
+});
+                        
+///////////-------- FIN POUP MENU
+
+
+
+
+//////////----------POPUP MENU TAREAS
+
+ $("#tablaTareasPorPlan").bind("contextmenu", function(e){
+    $("#menuPopTareasPorPlan").css({'display':'block', 'left':e.pageX, 'top':e.pageY});
+     return false;
+ });
+ 
+ //cuando hagamos click, el menú desaparecerá
+$(document).click(function(e){
+    if(e.button == 0){
+        $("#menuPopTareasPorPlan").css({'display':'none'});
+    }
+});
+             
+//si pulsamos escape, el menú desaparecerá
+$(document).keydown(function(e){
+    if(e.keyCode == 27){
+        $("#menuPopTareasPorPlan").css({'display':'none'});
+    }
+});
+
+//controlamos los botones del menú
+$("#menuPopTareasPorPlan").click(function(e){
+
+    // El switch utiliza los IDs de los <li> del menú
+    switch(e.target.id){
+
+        
+        case "modificar":
+            modificarTareasPorPlan()
+        break;
+    }
+
+});
+                        
+///////////-------- FIN POUP MENU
+
 
 
 </script>

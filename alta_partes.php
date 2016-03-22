@@ -12,8 +12,7 @@
 <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
 <script type="text/javascript" src="Includes/Utilities.js"></script>
 <link href="Estilos/estilo_Template.css" rel="stylesheet" type="text/css"/>
-<link rel="stylesheet" href="Includes/Remodal-1.0.6/dist/remodal.css">
-<link rel="stylesheet" href="Includes/Remodal-1.0.6/dist/remodal-default-theme.css">
+
 </head>
 
 <script src="Includes/Remodal-1.0.6/dist/remodal.min.js"></script>
@@ -30,113 +29,54 @@
 <div class="container">
     
   <!-- InstanceBeginEditable name="EditRegion2" -->
-  
- 
 
 
-<div id="tablaPartes">
-<h2>Partes del vehiculo</h2>
-<table id="tablaPartes"><tr>
-	<th>ID</th><th>Nombre</th>
-	</tr>
+
+<div id="prueba">
+<table id="tablaPendientes">
+<thead><th>ID</th><th>Nombre</th><th>Operacion</th></thead>
+<tbody>
+</tbody>
 </table>
+
+
 </div>
-
-<div id="tablaPartesDePartes">
-<h2>Partes que componen partes</h2>
-<table id="tablaPartesDePartes"><tr>
-	<th>ID</th><th>Nombre</th>
-	</tr>
-</table>
-</div>
-
-
-
-
-<h2>Descripcion de parte</h2>
-<form id="formAltaPartes" action="" title="" method="post">
-
-<li><label>Tipo:</label>
-<select id="tipo">
-<option>Parte</option>
-<option>Accesorio</option>
-<option>Insumo</option>
-<option>Lubricante</option>
-<option>Cubiertas</option>
-</select></li>
-<li><label>Nombre:</label>
-<input id="nombre" type="text" /></li>
-<li><label>Descripcion:</label></li>
-<li><textarea id="descripcion" cols="40" rows="5"></textarea>
-
-<li> <button id="submitParte" type="submit">Agregar</button> 
-</form></li>
-
-
 <script>
 
-
-
-function agregarCampo(){
-	var tipo=$("#tipo").val();
-	var nuevoCampo="";
-	if(tipo=='Parte'){
+$.ajax({
+	url: 'Includes/pendientes_mantenimiento.php',
+	type: 'POST',
+	dataType:"json",
+	success: function(data){
+		$("#tablaPendientes tr").each(function(index, element) {
+            if(index!=0){
+				$(this).remove();
+			}
+        });
+		$.each(data,function(index,element){
+		var boton="<button id=\"btnOperacion\">"
+		if((element.tipo=="Documentacion")||(element.tipo=="Seguridad")){
+			boton=boton+"Renovar"+"</button>";
+		}else if((element.tipo=="Lubricantes")||(element.tipo=="Filtros")){
+			boton=boton+"Cambiar"+"</button>";
+		}
+		$("#tablaPendientes > tbody:last").append("<tr><td>"+element.idpartes+"</td><td>"+element.nombre+"</td><td>"+boton+"</td></tr>");
+		});
 		
 		
 		
+		
+	},
+	error: function(jqXHR, textStatus, errorThrown){
+	alert(textStatus);
 	}
-	if(tipo=='Accesorio'){
-		nuevoCampo+="<li><label class=\"agregado\" >Fecha de colocacion:</label>";
-		nuevoCampo+="<input type=\"date\" id=\"fechaInicio\" class=\"agregado\" required /></li>";
-		
-		nuevoCampo+="<li><label class=\"agregado\" >Fecha de vencimiento:</label>";
-		nuevoCampo+="<input type=\"date\" id=\"fechaFin\" class=\"agregado\" required /></li>";
-			
-		
-	}
-	if(tipo=='Insumo'){
-		nuevoCampo+="<li><label class=\"agregado\" >Km de colocacion:</label>";
-		nuevoCampo+="<input type=\"text\" id=\"kmColocacion\" class=\"agregado\" required /></li>";
-		nuevoCampo+="<li><label class=\"agregado\" >Fecha de colocacion:</label>";
-		nuevoCampo+="<input type=\"date\" id=\"fechaInicio\" class=\"agregado\" required /></li>";
-		
-		nuevoCampo+="<li><label class=\"agregado\" >Fecha de vencimiento:</label>";
-		nuevoCampo+="<input type=\"date\" id=\"fechaFin\" class=\"agregado\" required /></li>";
-			
-		
-	}
-	$(".agregado").remove();
-	$("#nombre").after(nuevoCampo);
+	});
+
+$("#tablaPendientes").on('click','#btnOperacion',function(){
+	//alert($(this).parents('tr').find('td:first').text());
+	$(this).closest('tr').remove();
 	
-	var now = new Date();
-
-var day = ("0" + now.getDate()).slice(-2);
-var month = ("0" + (now.getMonth() + 1)).slice(-2);
-
-var today = now.getFullYear()+"-"+(month)+"-"+(day) ;
-
-$('#fechaInicio').val(today);
-$('#fechaFin').val(today);
-}
-
-$("#tipo").on("change",function()
-{
-	agregarCampo();	
-});
-
-$(window).on("load",this,function(){
-	agregarCampo();
-	
-});
-
-$(document).ready(function(e) {
-	
-    
-    loadTable("#tablaPartes tr:last","cargarTablaPartes",$vehiculoActual,'parte');
-	
-	
-});
-
+});	
 
 
 </script>  

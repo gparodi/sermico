@@ -40,6 +40,8 @@ case 'borrarVehiculo':
 case 'modificarVehiculo':
 		modificarVehiculo();
 		break;
+case 'getProximoVehiculo': getProximoVehiculo();
+		break;
 //-----FIN VEHICULOS
 //---------------- PARTES DE VEHICULOS---------------///
 
@@ -57,6 +59,21 @@ case  'cargarTablaDocumentacion':
 case  'modificarDocumentacion':
 	   modificarDocumentacion();
 	   break;
+	   
+case 'altaPartesVehiculo':
+		altaPartesVehiculo();
+		break;
+		
+case 'cargarComboBoxTiposPartes':
+		cargarComboBoxTiposPartes();
+		break;
+case 'cargarTablaVehiculosPartes':
+		cargarTablaVehiculosPartes();
+		break;
+		
+case 'borrarParte':
+		borrarParte();
+		break;
 
 //-----FIN PARTES DE VEHICULOS
 //---------------- MANTENIMIENTO---------------///
@@ -111,23 +128,148 @@ case 'listar_tareas_por_planmantenimiento':listar_tareas_por_planmantenimiento()
 		
 case 'altaTarea':altaTarea();
 		break;
+		
+case 'setVehiculoEnPlanMantenimiento':setVehiculoEnPlanMantenimiento();
+		break;
+case 'borrarTarea':borrarTarea();
+		break;
+case 'altaPlanMantenimiento': altaPlanMantenimiento();
+		break;
+
+
 //-----PLAN DE MANTENIMIENTO
 
+//----------------ALERTAS---------------///
+case 'cargarTablaAlertasMail':cargarTablaAlertasMail();
+		break;
+case 'getAlertas':getAlertas();
+		break;
+
+//-----ALERTAS
 
 }
 		
+//----------------ALERTAS---------------///
+
+function cargarTablaAlertasMail(){
+	$idAlertas=$_POST["atributo1"];
+	$query = "CALL listar_alertas_mails(".$idAlertas.");";
+	$result = executeQuery($query);
+	if(mysql_num_rows($result) != 0){
+		$row = mysql_fetch_array($result);
+		$dato=$row["mails"];
+		$mails=explode(",",$dato);
+		$tabla="";	
+		for($i=0;$i<sizeof($mails);$i++){
+			$tabla=$tabla."<tr><td>".$mails[$i]."</td></tr>";		
+		}
+	}else{
+		$tabla="<tr><td>No hay informacion para mostrar</td></tr>";
+	}
+	echo $tabla;
+	
+	return;
+}
+
+function getAlertas(){
+	$idPlanMantenimiento=$_POST["idPlanMantenimiento"];
+	$query = "CALL listar_alertas_mails(".$idPlanMantenimiento.");";
+	$result = executeQuery($query);
+	if(mysql_num_rows($result) != 0){
+		$row = mysql_fetch_array($result);
+		$kmAntes=$row["kmAntes"];
+		$horasAntes=$row["horasAntes"];
+		$diasAntes=$row["diasAntes"];
+		$mesesAntes=$row["mesesAntes"];
+		
+		$alertas=array("kmAntes"=>$kmAntes, "horasAntes"=>$horasAntes, "diasAntes"=>$diasAntes, "mesesAntes"=>$mesesAntes);
+		echo json_encode($alertas);
+	
+		
+	}else{
+		$alertas=array("kmAntes"=>"", "horasAntes"=>"", "diasAntes"=>"", "mesesAntes"=>"");
+		echo json_encode($alertas);
+	}
+	
+	return;
+	
+}
+
+		
 //----------------PLAN DE MANTENIMIENTO---------------///
+
+
+
+
+function altaPlanMantenimiento(){
+
+	$titulo=$_POST["titulo"];
+	$km=$_POST["km"];
+	$horas=$_POST["horas"];
+	$dias=$_POST["dias"];
+	$meses=$_POST["meses"];
+	$años=$_POST["años"];
+	$descripcion=$_POST["descripcion"];
+	$ultimoVencimiento=$_POST["ultimoVencimiento"];
+	$estado=$_POST["estado"];
+	
+
+	$query = "CALL alta_plamantenimiento('".$numero."','".$patente."','".$marca."','".$modelo."','".$año."',null".",'".$motor."','".$chasis."','".$modeloMotor."','".$ot."','".$tipo."','".$combustible."','".$descripcion."','".$consumo."','".$km."');";
+	$result = executeQuery($query);  
+	echo $query; 
+	if($row = mysql_fetch_array($result)){
+		echo $row["resultado"];
+	}else{
+		echo "Error";
+	}
+	
+	
+}
+
+function borrarTarea(){
+	$array_baja=array();
+	$array_nop=array();
+	$index=$_POST["index"];
+	$idplan=$_POST["planmantenimiento"];
+	
+	$query = "CALL listar_tareas_por_planmantenimiento('".$idplan."')";
+	$result = executeQuery($query);
+	  
+	while($row = mysql_fetch_array($result))
+	  {
+		$idTarea=$row["idtareas"];
+		$estado="NOK";
+		for($i=0;$i<$index;$i++){
+			$datos=$_POST[$i];
+			if($datos["ID"]==$idTarea){
+				$estado="OK";	
+			}
+		}
+		if($estado=="NOK"){
+			array_push($array_baja,$idTarea);		
+		}
+		
+		
+	  }
+	
+	if(isset($array_baja)){
+		for($i=0;$i<sizeof($array_baja);$i++){
+			$idTarea=$array_baja[$i];
+			$query = "CALL borrar_tarea(".$idTarea.");";
+			$result = executeQuery($query);
+		}
+	}
+	
+}
 
 function altaTarea(){
 	
 	$idPlanMantenimiento=$_POST["idPlanMantenimiento"];
-	$idPlanMantenimiento=$_POST[""];
-	$idPlanMantenimiento=$_POST["idPlanMantenimiento"];
-	$idPlanMantenimiento=$_POST["idPlanMantenimiento"];
-
-	$query = "CALL alta_vehiculo('".$numero."','".$patente."','".$marca."','".$modelo."','".$año."',null".",'".$motor."','".$chasis."','".$modeloMotor."','".$ot."','".$tipo."','".$combustible."','".$descripcion."','".$consumo."','".$km."');";
+	$titulo=$_POST["titulo"];
+	$operacion=$_POST["operacion"];
+	$descripcion=$_POST["descripcion"];
+	$query = "CALL alta_tarea(".$idPlanMantenimiento.",'".$titulo."','".$operacion."','".$descripcion."');";
 	$result = executeQuery($query);  
-	echo $query; 
 	if($row = mysql_fetch_array($result)){
 		echo $row["resultado"];
 	}else{
@@ -175,8 +317,7 @@ function getPlanDeMantenimiento(){
 	$idPlan=$_POST["idPlanMantenimiento"];
 	$query = "CALL buscar_planmantenimiento('".$idPlan."')";
 	$result = executeQuery($query);
-	$row = mysql_fetch_array($result);
-	
+	$row = mysql_fetch_array($result);	
 	$idPlanMantenimiento=$row["idplanMantenimiento"];
 	$titulo=$row["titulo"];
 	$km=$row["km"];
@@ -185,13 +326,9 @@ function getPlanDeMantenimiento(){
 	$meses=$row["meses"];
 	$años=$row["años"];
 	$descripcion=$row["descripcion"];
-	$ultimoVencimiento=$row["ultimoVencimiento"];
 	$estado=$row["estado"];
 	
-	
-	
-	
-	$planMantenimiento=array("idPlanMantenimiento"=>$idPlanMantenimiento, "titulo"=>$titulo, "km"=>$km, "horas"=>$horas, "dias"=>$dias, "meses"=>$meses, "años"=>$años, "descripcion"=>$descripcion, "ultimoVencimiento"=>$ultimoVencimiento, "estado"=>$estado);
+	$planMantenimiento=array("idPlanMantenimiento"=>$idPlanMantenimiento, "titulo"=>$titulo, "km"=>$km, "horas"=>$horas, "dias"=>$dias, "meses"=>$meses, "años"=>$años, "descripcion"=>$descripcion, "estado"=>$estado);
 	
 	echo json_encode($planMantenimiento);
 	
@@ -255,11 +392,78 @@ function listar_tareas_por_planmantenimiento(){
 }
 
 
-//-----PLAN DE MANTENIMIENTO
 
-
+function setVehiculoEnPlanMantenimiento(){
+	$array_alta=array();
+	$array_baja=array();
+	$array_nop=array();
+	$index=$_POST["index"];
+	$idplan=$_POST["planmantenimiento"];
+	
+	$query = "CALL listar_vehiculos_por_plan('".$idplan."')";
+	$result = executeQuery($query);
+	  
+	while($row = mysql_fetch_array($result))
+	  {
+		$vehiculo_numero=$row["idInterno"];
+		$estado="NOK";
+		for($i=0;$i<$index;$i++){
+			$datos=$_POST[$i];
+			if($datos["Numero"]==$vehiculo_numero){
+				echo "Esta bien";
+				$estado="OK";	
+			}
+		}
+		if($estado=="OK"){
+			array_push($array_nop,$vehiculo_numero);
+			
+		}else if($estado=="NOK"){
+			array_push($array_baja,$vehiculo_numero);		
+		}
+		
+		
+	  }
+	
+	for($i=0;$i<$index;$i++){
+		$datos=$_POST[$i];
+		if(in_array($datos["Numero"],$array_baja)){
+			echo "todo bien";
+		}else if (in_array($datos["Numero"],$array_baja)){
+			
+		}else{
+			array_push($array_alta,$datos["Numero"]);
+		}
+	}
+	if(isset($array_alta)){
+		
+		for($i=0;$i<sizeof($array_alta);$i++){
+			$query = "CALL buscar_vehiculo('".$array_alta[$i]."')";
+			$result = executeQuery($query);
+			$row = mysql_fetch_array($result);
+			$km=$row["kilometros"];
+			$query = "CALL alta_vehiculo_en_planmantenimiento('".$array_alta[$i]."','".$idplan."','".$km."',null);";
+			$result = executeQuery($query);
+		}
+	}
+	if(isset($array_baja)){
+		for($i=0;$i<sizeof($array_baja);$i++){
+			$query = "CALL borrar_vehiculo_de_planmantenimiento('".$array_baja[$i]."','".$idplan."');";
+			$result = executeQuery($query);
+		}
+	}
+	
+}
 
 //----------------VEHICULOS---------------///
+
+function getProximoVehiculo(){
+	$tipo=$_POST["tipo"];
+	$query = "CALL get_proximo_numero('".$tipo."')";
+	$result = executeQuery($query);	   
+	$row = mysql_fetch_array($result);
+	echo $row['proximo_vehiculo'];
+	
+}
 
 //-------CARGAR TABLA VEHICULOS
 function cargarTablaVehiculos(){
@@ -272,21 +476,21 @@ function cargarTablaVehiculos(){
 	while($row = mysql_fetch_array($result))
 	  {
 		$tabla=$tabla."<tr><td>" . 
-			$row["idInterno"] . "</font></td>";
+			$row["idInterno"] . "</td>";
 		$tabla=$tabla. "<td>" . 
-			$row["marca"] . "</font></td>";
+			$row["marca"] . "</td>";
 		$tabla=$tabla. "<td>" . 
-			$row["modelo"] . "</font></td>";
+			$row["modelo"] . "</td>";
 		$tabla=$tabla. "<td>" . 
-			$row["patente"]. "</font></td>";
+			$row["patente"]. "</td>";
 		$tabla=$tabla. "<td>" . 
-			$row["año"] . "</font></td>";
+			$row["año"] . "</td>";
 		$tabla=$tabla. "<td>" . 
-			$row["tipo"] . "</font></td>";
+			$row["tipo"] . "</td>";
 		$tabla=$tabla. "<td>" . 
-			$row["kilometros"] . "</font></td>";
+			$row["kilometros"] . "</td>";
 		$tabla=$tabla. "<td>" . 
-			$row["estado"] . "</font></td></tr>";
+			$row["estado"] . "</td></tr>";
 		
 		
 	  }
@@ -296,6 +500,45 @@ function cargarTablaVehiculos(){
 	 echo $tabla;		 	
 
 	  return;
+}
+
+function cargarTablaVehiculosPartes(){
+	$tipo=$_POST["atributo1"];
+	$vehiculo=$_POST["atributo2"];
+	  $query = "CALL listar_partes('".$vehiculo."',0,'".$tipo."')";
+	  $result = executeQuery($query);
+	  $tabla="";
+	   
+	while($row = mysql_fetch_array($result))
+	  {
+		$tabla=$tabla."<tr><td>" . 
+			$row["idpartes"] . "</td>";
+		$tabla=$tabla. "<td>" . 
+		$row["nombre"] . "</td>";
+		$tabla=$tabla. "<td>" .
+			$row["kmInicial"] . "</td>";
+		$tabla=$tabla. "<td>" . 
+			$row["kmFinal"] . "</td>";
+		$tabla=$tabla. "<td>" . 
+			$row["fechaInicial"]. "</td>";
+		$tabla=$tabla. "<td>" . 
+			$row["fechaProxima"] . "</td>";
+		$tabla=$tabla. "<td>" . 
+			$row["descripcion"] . "</td>";
+		$tabla=$tabla. "<td>" . 
+			$row["especificaciones"] . "</td></tr>";
+		
+		
+	  }
+	  if($tabla==""){
+		  $tabla=$tabla."<tr ><td colspan=\"9\">No hay informacion para mostrar</td></tr>";
+	  }
+	 echo $tabla;
+		 	
+
+	  return;
+	
+	
 }
 
 //-------ALTA VEHICULOS
@@ -318,14 +561,12 @@ function altaVehiculo(){
 	$query = "CALL alta_vehiculo('".$numero."','".$patente."','".$marca."','".$modelo."','".$año."',null".",'".$motor."','".$chasis."','".$modeloMotor."','".$ot."','".$tipo."','".$combustible."','".$descripcion."','".$consumo."','".$km."');";
 	$result = executeQuery($query);  
 	echo $query; 
-	if($row = mysql_fetch_array($result)){
-		echo $row["resultado"];
-	}else{
-		echo "Error";
-	}
+	
 	
 	
 }
+
+
 
 function cargarComboBoxVehiculos(){
 	$query = "CALL listar_vehiculos()";
@@ -429,8 +670,6 @@ function getKm(){
 	$vehiculo=$_POST["vehiculo"];
 	$query = "CALL buscar_vehiculo('".$vehiculo."')";
 	$result = executeQuery($query);
-	   
-	   
 	$row = mysql_fetch_array($result);
 	$km=$row["kilometros"];
 	echo json_encode(array('km' => $km));
@@ -450,6 +689,20 @@ function cargarComboBoxTipos(){
 	  
 	  echo $opciones;
 	  
+}
+
+function cargarComboBoxTiposPartes(){
+	$query = "CALL listar_tipos_partes();";
+	$result = executeQuery($query);
+	$opciones="";
+	while($row = mysql_fetch_array($result))
+	  {
+		   $opciones.='<option value="'.$row["tipo"].'">'.$row["tipo"].'</option>';
+		  
+	  }
+	  
+	  echo $opciones;
+	
 }
 
 function borrarVehiculo(){
@@ -472,6 +725,48 @@ function borrarVehiculo(){
 
 
 //---------------- PARTES DE VEHICULOS---------------///
+
+function altaPartesVehiculo(){
+
+	$padre=$_POST["padre"];
+	$vehiculo=$_POST["vehiculo"];
+	$nombre=$_POST["nombre"];
+	$tipo=$_POST["tipo"];
+	$kmInicial=$_POST["kmInicial"];
+	$kmFinal=$_POST["kmFinal"];
+	$fechaInicio=$_POST["fechaInicio"];
+	$fechaFin=$_POST["fechaFin"];
+	$descripcion=$_POST["descripcion"];	
+	$especificaciones=$_POST["especificaciones"];
+	
+	$query = "CALL alta_partes(0,'".$padre."','".$vehiculo."','".$nombre."','".$tipo."','".$kmInicial."','".$kmFinal."','".$fechaInicio."','".$fechaFin."','".$descripcion."','".$especificaciones."',true);";
+	$result = executeQuery($query);
+	if(mysql_num_rows($result) > 0){
+		$row = mysql_fetch_array($result);
+		
+	}
+		echo $query;
+	
+	
+	
+}
+
+function getPartes(){
+	$idparte=$_POST["idparte"];
+	$query = "CALL buscar_partes(".$idparte.")";
+	$result = executeQuery($query);
+	echo $query;
+	if(mysql_num_rows($result) != 0){
+		while($row = mysql_fetch_array($result))
+	 	 {
+			$parte=array("nombre"=>$nombre,"tipo"=>$tipo,"kmInicial"=>$kmInicial,"kmFinal"=>$kmFinal,"fechaInicial"=>$fechaInicial,"fechaProxima"=>$fechaProxima,"descripcion"=>$descripcion,"especificaciones"=>$especificaciones);
+				
+	  	}
+	  	echo json_encode($parte);
+	  }
+	  
+}
+	
 
 function cargarTablaPartes($vehiculo,$tipo){
 	
@@ -498,7 +793,25 @@ function cargarTablaPartes($vehiculo,$tipo){
 	  return;
 }
 
-
+function borrarParte(){
+	$idPartes=$_POST["idPartes"];
+	$query = "CALL borrar_parte(".$idPartes.")";
+	if($result = executeQuery($query)){
+		$row = mysql_fetch_array($result);
+		
+		if($row["resultado"]=="OK"){
+			echo "El vehiculo fue eliminado con exito";	
+		}else{
+			echo "No es posible borrar este vehiculo debido a que existen datos relacionados con el mismo. Por favor comuniquese con el administrador";
+		}
+		
+	}else{
+		echo "No es posible borrar este vehiculo debido a que existen datos relacionados con el mismo. Por favor comuniquese con el administrador";
+		
+	}
+	
+	
+}
 
 function cargarTablaDocumentacion(){
 	
@@ -507,7 +820,6 @@ function cargarTablaDocumentacion(){
 	  $query = "CALL listar_partes('".$vehiculo."',0,'".$tipo."')";
 	  $result = executeQuery($query);
 	  $tabla="";
-	  echo $query;
 	  if(mysql_num_rows($result) != 0){
 	while($row = mysql_fetch_array($result))
 	  {
@@ -666,7 +978,6 @@ function getMantenimiento(){
 
 function altaMantenimiento(){
 	
-	
 	 
 	  $titulo=$_POST["titulo"];
 	  $proveedor=$_POST["proveedor"];
@@ -683,8 +994,7 @@ function altaMantenimiento(){
 	 $query = "CALL alta_mantenimiento('".$proveedor."','".$fechaInicio."','".$fechaFin."','".$km."','".$precio."','".$estado."','".$titulo."','".$descripcion."');";
 	$result = executeQuery($query);
 	 $row = mysql_fetch_array($result);	 
-	 $nuevoId=$row["idMantenimiento"];
-	 
+	 $nuevoId=$row["idMantenimiento"]; 
 	
 		
 	echo json_encode(array('id' => $nuevoId)); 
@@ -812,22 +1122,27 @@ function executeQuery($query){
 		$tipo_ip="publica";
 	}
 	if($tipo_ip=="publica"){
-		session_start();
+		if(!isset($_SESSION)){
+    		session_start();
+		}
 		
 		if(!isset($_SESSION[$ip_cliente])){
 			
 			$jsonData = file_get_contents(				"http://api.ipinfodb.com/v3/ip-city/?key=d0562b866396d2d2b8129e30ff3bf8c7e564a7b533b315f0e529113615fb909c&ip=".$ip_cliente."&format=json");
 				
 			$ubicacion_data = json_decode($jsonData,true);
-			if($ubicacion_data["cityName"]=="Neuquen"||$ubicacion_data["regionName"]=="Neuquen"){
-				echo ("Estas en Neuquen");
+			if($ubicacion_data["cityName"]!="Tucuman"||$ubicacion_data["regionName"]!="Tucuman"){
 				$dbname="control_vehiculos_nqn";
-				session_start();
+				if(!isset($_SESSION)){
+    				session_start();
+				}
 				$_SESSION[$ip_cliente]=$dbname;
 			
 		}else{
 			$dbname="control_vehiculos";
-			session_start();
+			if(!isset($_SESSION)){
+    			session_start();
+			}
 			$_SESSION[$ip_cliente]=$dbname;
 		}
 		
@@ -838,7 +1153,7 @@ function executeQuery($query){
 	}else{
 		$dbname="control_vehiculos";
 	}
-	
+	$dbname="control_vehiculos";
 	$str_datos = file_get_contents("datos.json");
 	$datos = json_decode($str_datos,true);
 	$dbPass=$datos[$host]["Pass"];

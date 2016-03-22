@@ -25,6 +25,8 @@ function enviarMail($listaMails,$asunto,$body){
 	$mail->AltBody = "Si no puede ver este mensaje por favor comuniquese con el administrador: g.parodi@sermico.com.ar"; 
 	
 	// si el cuerpo del mensaje es HTML
+	
+	
 	$mail->MsgHTML($body);
 	
 	// podemos hacer varios AddAdress

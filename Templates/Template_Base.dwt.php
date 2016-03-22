@@ -11,8 +11,7 @@
 <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
 <script type="text/javascript" src="Includes/Utilities.js"></script>
 <link href="Estilos/estilo_Template.css" rel="stylesheet" type="text/css"/>
-<link rel="stylesheet" href="Includes/Remodal-1.0.6/dist/remodal.css">
-<link rel="stylesheet" href="Includes/Remodal-1.0.6/dist/remodal-default-theme.css">
+
 </head>
 
 <script src="Includes/Remodal-1.0.6/dist/remodal.min.js"></script>

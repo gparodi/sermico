@@ -12,8 +12,7 @@
 <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
 <script type="text/javascript" src="Includes/Utilities.js"></script>
 <link href="Estilos/estilo_Template.css" rel="stylesheet" type="text/css"/>
-<link rel="stylesheet" href="Includes/Remodal-1.0.6/dist/remodal.css">
-<link rel="stylesheet" href="Includes/Remodal-1.0.6/dist/remodal-default-theme.css">
+
 </head>
 
 <script src="Includes/Remodal-1.0.6/dist/remodal.min.js"></script>
@@ -197,45 +196,7 @@ $('#tablaPartes').on( 'click', 'td', function (e) {
 	});
 	
 	
-	/*
 	
-	
-	var $row = jQuery(this).closest('tr');
-    var $columns = $row.find('td');
-	var id;
-    var values = '<tr>';
-    jQuery.each($columns, function(i, item) {
-		if(i<=1){
-        	values = values +"<td>"+ item.innerHTML + "</td>" ;
-		}
-		if(i==0){
-				id=item.innerHTML;
-			}
-		
-    
-	});
-	
-	
-	
-	var  base=0,bandera=0;
-	$("#tablaPartesDePartes tr td").each(function (indice,elemento) {
-		if(base==indice){
-			if(id==elemento.innerHTML){
-				bandera=1;
-			}
-			base =parseInt(base)+3;
-		}
-	
-	});	
-	values +="<td><button class=\"deleteParte\">Quitar Parte</button></td>";
-	values += '</tr>';
-	if(bandera!=1){
-		$("#tablaPartesDePartes tr:last").after(values);
-	}
-	
-	
-	
-	loadTable("#tablaPartesDePartes tr:last","cargarTablaPartesDePartes",$vehiculoActual,'parte',$(this).html().toString());*/
 	 
 } );
 

@@ -12,8 +12,7 @@
 <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
 <script type="text/javascript" src="Includes/Utilities.js"></script>
 <link href="Estilos/estilo_Template.css" rel="stylesheet" type="text/css"/>
-<link rel="stylesheet" href="Includes/Remodal-1.0.6/dist/remodal.css">
-<link rel="stylesheet" href="Includes/Remodal-1.0.6/dist/remodal-default-theme.css">
+
 </head>
 
 <script src="Includes/Remodal-1.0.6/dist/remodal.min.js"></script>
@@ -48,6 +47,7 @@
 <button id="botonDetalles"> Ver detalles </button>
 
 <div  id="detalleVehiculos" style="display:none">
+<h2>Detalles del vehiculo</h2>
 <form id="formVehiculo" action="" title="" method="post">
 
 <li id="listaTipos" style="display:none"><label>Tipo:</label>
@@ -107,7 +107,21 @@
 </li>
 <li> <button id="btnModificarVehiculo" type="submit" style="display:none" value="btnModificarVehiculo">Aceptar</button> 
 </li></form>
+
+<div id="partes">
+<h2>Componentes</h2>
+<div id="filtros">Filtrar por:
+<select id="comboBoxFiltroPartes"> </select>
+
 </div>
+<table id="tablaVehiculosPartes"><thead><tr>
+<th>ID</th><th>Nombre</th><th>Colocacion(Km)</th><th>Vencimiento(Km)</th><th>Colocacion(Fecha)</th><th>Vencimiento(Fecha)</th><th>Descripcion</th><th>Especificaciones</th></tr></thead><tbody class="scrollContent"></tbody>
+
+
+</table>
+</div>
+</div>
+
 
 <div id="menuPop" class="menuPopUp" style="display:none">
       <ul>
@@ -118,28 +132,60 @@
         </ul>
 </div>
 
-<div id="prueba">
-
+<div id="menuPopPartes" class="menuPopUp" style="display:none">
+      <ul>
+            <li id="nuevo">Nuevo</li>
+            <li id="eliminar">Eliminar</li>
+            <li id="modificar">Modificar</li>
+           
+        </ul>
 </div>
+<div id="partesVehiculos_Modal">
+ 	
+</div>
+
 
  <script>
  var $vehiculoActual=0;
  var $estadoDetalle=0;
  var $estado=null;
  var $idBtn=null;
+ var $estadoModal=null;
  //FILTRO
-var $vehiculoActual;
+var $tipoPartes;
+var $vehiculoPartes=0;
 loadComboFromDB("#comboBoxFiltro","cargarComboBoxTipos",function(){
 	var $tipo=$("#comboBoxFiltro").val();
 	loadTableFromDb("#tablaVehiculos","cargarTablaVehiculos",$tipo);
+	
 		
 });
+
 
 $("#comboBoxFiltro").on("input",function(){	
 	
     var $tipo=$("#comboBoxFiltro").val();
 	loadTableFromDb("#tablaVehiculos","cargarTablaVehiculos",$tipo);
 	
+	
+});
+
+
+//---FIN FILTRO
+
+ //FILTRO PARTES
+loadComboFromDB("#comboBoxFiltroPartes","cargarComboBoxTiposPartes",function(){
+	$tipoPartes=$("#comboBoxFiltroPartes").val();
+	loadTableFromDb("#tablaVehiculosPartes","cargarTablaVehiculosPartes",$tipoPartes,$vehiculoActual);
+	
+		
+});
+
+$("#comboBoxFiltroPartes").on("input",function(){	
+	
+    $tipoPartes=$("#comboBoxFiltroPartes").val();
+	loadTableFromDb("#tablaVehiculosPartes","cargarTablaVehiculosPartes",$tipoPartes,$vehiculoActual);
+		
 	
 });
 
@@ -155,10 +201,12 @@ $("#tablaVehiculos").on("click",'tr',function() {
 $("#botonDetalles").on("click",this,function(){
 	
 	 mostrarDetalles();
+	 
 	
 });
 
 function mostrarDetalles(){
+	
 	if($estadoDetalle==0){
 		$("#botonDetalles").text("Ocultar detalle");
 		$("#detalleVehiculos").toggle("slow");
@@ -209,8 +257,24 @@ $('#tablaVehiculos').not("first").on( 'click', 'td', function (e) {
 });
 
 
+$('#tablaVehiculosPartes').not("first").on( 'click', 'td', function (e) {
+	var $row = jQuery(this).closest('tr');
+    var $columns = $row.find('td');
+	jQuery.each($columns, function(i, item) {
+			if(i==0){
+				$vehiculoPartes=item.innerHTML;
+			}
+	});
+	
+	$('tr.seleccionFila:first').removeClass("seleccionFila");
+   				$(this).closest("tr").addClass("seleccionFila");
+	
+	
+});
+
 function mostrarVehiculo(){
 	if($vehiculoActual!=0){
+		loadTableFromDb("#tablaVehiculosPartes","cargarTablaVehiculosPartes",$tipoPartes,$vehiculoActual);
 		$estado="mostrar";
 		$("#listaTipos").css({"display":"none"});
 		$("#btnModificarVehiculo").css({"display":"none"});
@@ -292,6 +356,10 @@ function nuevoVehiculo(){
 		$("#detalleVehiculos").css({'display':'block'});
 		$("#botonDetalles").css({'display':'none'});
 	}
+	sendAjaxHtml({tarea:'getProximoVehiculo',tipo:'Camioneta'},function(response){
+		$("#numero").val(response);
+	});
+	
 	$('html,body').animate({
         scrollTop: $("#formVehiculo").offset().top
     }, 2000);
@@ -303,9 +371,12 @@ function nuevoVehiculo(){
 	$("#tipo").focus();
 	$estado="nuevo";
 	
+	
 }
 
- $("#tablaVehiculos").bind("contextmenu", function(e){
+//-----------MENU CONTEXTUAL TABLA VEHICULOS
+
+ $("#tablaVehiculos tbody").bind("contextmenu", function(e){
     $("#menuPop").css({'display':'block', 'left':e.pageX, 'top':e.pageY});
      return false;
  });
@@ -360,7 +431,53 @@ function nuevoVehiculo(){
             });
 			
  
+// FIN MENU CONTEXTUAL TABLA VEHICULOS
 
+
+//-----------MENU CONTEXTUAL TABLA VEHICULOS PARTES
+
+ $("#tablaVehiculosPartes tbody").bind("contextmenu", function(e){
+    $("#menuPopPartes").css({'display':'block', 'left':e.pageX, 'top':e.pageY});
+     return false;
+ });
+ 
+ //cuando hagamos click, el menú desaparecerá
+            $(document).click(function(e){
+                  if(e.button == 0){
+                        $("#menuPopPartes").css({'display':'none'});
+                  }
+            });
+             
+            //si pulsamos escape, el menú desaparecerá
+            $(document).keydown(function(e){
+                  if(e.keyCode == 27){
+                        $("#menuPopPartes").css({'display':'none'});
+                  }
+            });
+
+//controlamos los botones del menú
+            $("#menuPopPartes").click(function(e){
+                   
+                  // El switch utiliza los IDs de los <li> del menú
+                  switch(e.target.id){
+                        
+                        case "eliminar":
+							borrarParte();
+                              
+                              break;
+						 case "nuevo":
+						 	  altaPartesVehiculos();
+                              break;
+						case "modificar":
+							
+                              
+                              break;
+                  }
+                   
+            });
+			
+ 
+// FIN MENU CONTEXTUAL TABLA VEHICULOS PARTES
   
  $("#formVehiculo").on("submit",this,function(e){
 	var datos;
@@ -390,8 +507,8 @@ function nuevoVehiculo(){
 	}
 	sendAjaxHtml(datos,function(dato){
 		//$(location).attr('href','vehiculos.php');
-		//$("#prueba").empty();
-		//$("#prueba").append(dato);
+		$("#prueba").empty();
+		$("#prueba").append(dato);
 		loadTableFromDb("#tablaVehiculos","cargarTablaVehiculos",$("#comboBoxFiltro").val());
 		cleanForm("#formVehiculo");
 		mostrarVehiculo();
@@ -403,7 +520,66 @@ function nuevoVehiculo(){
 });                       
    
 
+function borrarParte(){
+	
+	if($vehiculoPartes!=0){
+		$estado="borrar";
+		if (confirm('¿Esta seguro que desea eliminar el vehiculo seleccionado?')){
+			sendAjaxHtml({tarea:'borrarParte',idPartes:$vehiculoPartes},function(datos){
+					alert(datos);
+					loadTableFromDb("#tablaVehiculosPartes","cargarTablaVehiculosPartes",$tipoPartes,$vehiculoActual);
+				
+				});	
+		}
+		
+	}else{
+		alert("Por favor seleccione un vehiculo para borrar");
+	}
+	
+	
+}
 
+function mostrarModalPartes(){
+	$('#partesVehiculos_Modal').load('panel_alta_partes.php');
+		 $('#partesVehiculos_Modal').dialog({
+			 resizable: false,
+			  height:500,
+			  width:900,
+			  modal: true,
+			  close: function(e,ui){
+				loadTableFromDb("#tablaVehiculosPartes","cargarTablaVehiculosPartes",$tipoPartes,$vehiculoActual);
+				  
+			  }
+      		
+    	});
+	
+}
+
+function altaPartesVehiculos(){
+	$estadoModal='alta';
+	mostrarModalPartes();	
+}
+
+function mostrarPartesVehiculos(){
+	$estadoModal='mostrar';
+	mostrarModalPartes();
+	
+}
+
+$('#tablaVehiculosPartes tbody').on("dblclick",this,function(){
+	 mostrarPartesVehiculos();
+});
+
+function cerrarModalPartes(){
+	$("#partesVehiculos_Modal").dialog("close");
+	loadComboFromDB("#comboBoxFiltroPartes","cargarComboBoxTiposPartes",function(){
+	$tipoPartes=$("#comboBoxFiltroPartes").val();
+	loadTableFromDb("#tablaVehiculosPartes","cargarTablaVehiculosPartes",$tipoPartes,$vehiculoActual);
+	
+		
+});
+
+}
  
 </script>
   
