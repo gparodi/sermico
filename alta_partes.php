@@ -30,10 +30,12 @@
     
   <!-- InstanceBeginEditable name="EditRegion2" -->
 
+<div id="prueba2">
 
+</div>
 
 <div id="prueba">
-<table id="tablaPendientes">
+<table  id="tablaPendientes">
 <thead><th>ID</th><th>Nombre</th><th>Operacion</th></thead>
 <tbody>
 </tbody>
@@ -73,7 +75,17 @@ $.ajax({
 	});
 
 $("#tablaPendientes").on('click','#btnOperacion',function(){
-	//alert($(this).parents('tr').find('td:first').text());
+	var idParte=$(this).parents('tr').find('td:first').text();
+	var operacion=$(this).text();
+	if(operacion=='Renovar'){
+		var now = new Date();
+		var day = ("0" + now.getDate()).slice(-2);	
+		var month = ("0" + (now.getMonth() + 1)).slice(-2);
+		var today = now.getFullYear()+"-"+(month)+"-"+(day) ;
+		sendAjaxHtml({tarea:'updatePartes',idPartes:idParte,fechaVencimiento:today,kmVencimiento:null});
+	}else if(operacion=="Cambiar"){
+		
+	}
 	$(this).closest('tr').remove();
 	
 });	

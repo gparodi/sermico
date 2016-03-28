@@ -1,3 +1,14 @@
+<?php
+if (session_status()!=PHP_SESSION_ACTIVE) { session_start(); }
+if((session_status()!=PHP_SESSION_ACTIVE)||(empty($_SESSION['user_name'])))
+{
+header('Location: login.php');
+}else{
+	print_r($_SESSION);
+}
+
+?>
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:ice="http://ns.adobe.com/incontextediting"><!-- InstanceBegin template="/Templates/Template_Base.dwt.php" codeOutsideHTMLIsLocked="false" -->
 <head>
@@ -161,6 +172,23 @@ loadComboFromDB("#comboBoxFiltro","cargarComboBoxTipos",function(){
 		
 });
 
+$("#logout").on("click",this,function(){
+	window.sessionStorage.clear();
+	$(location).attr('href','index.php');
+	
+});
+
+$(document).ready(function(e) {
+    var user=window.sessionStorage.getItem('user_name');
+	var perfil=window.sessionStorage.getItem(user);
+	//COMPARA CON EL ID DE LA VENTANA...SI ES CORRECTO LO DEJA ENTRAR
+	var permiso=perfil&2;
+	if(permiso==0){
+		window.stop();
+		alert("No podes entrar aca viejo");
+		window.history.back();
+	}
+});
 
 $("#comboBoxFiltro").on("input",function(){	
 	

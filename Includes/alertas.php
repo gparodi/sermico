@@ -1,11 +1,42 @@
 <?php
 	require('mailSender.php');
+	
+
 	$listaplanes=array();
 	//BUSCA TODOS LOS PLANES DE MANTENIMIENTO
-	$query = "call listar_planes_mantenimiento();";
 	global $alertas;
 	$listaPartesMail=array();
 	$listaTareasMail=array();
+	alertas_mantenimientosProgramados();
+
+function alertas_mantenimientosProgramados(){
+	$query = "call listar_mantenimiento(0);";
+	$result = executeQuery($query);
+	$listaMantenimientos=array();
+	while($row = mysql_fetch_array($result))
+	  {
+		   $listaMantenimientos[]=$row;
+		  
+	  }
+	  for($i=0;$i<sizeof($listaMantenimientos);$i++){
+		  $mantenimiento=$listaMantenimientos[$i];
+		  if($mantenimiento["estado"]=="Programado"){
+			$fechaInicio =DateTime::createFromFormat('Y-m-d', $mantenimiento["fechaInicio"]); 
+        	$fechaActual = new DateTime('now');
+            $interval = $fechaInicio->diff($fechaActual);
+            $diffDias=$interval->format('%a');
+			echo $diffDias;
+			
+            
+		  }
+	  }
+	  
+	
+}
+
+
+function alertas_planMantenimiento(){
+	$query = "call listar_planes_mantenimiento();";
 	$result = executeQuery($query);	
 	$i=0;
 	while($row = mysql_fetch_array($result))
@@ -54,6 +85,7 @@
 		}
 		  
 }
+}
 		
 		  
 function comprobarPartesVehiculos($vehiculoIncluido,$alertas){
@@ -73,7 +105,7 @@ function comprobarPartesVehiculos($vehiculoIncluido,$alertas){
           for($i=0;$i<sizeof($partes);$i++){
 			 
 			  	//VERIFICA LAS PARTES QUE TENGAN FECHA DE VENCIMIENTO
-                  if($partes[$i]['fechaProxima']!=""){
+                  if(trim($partes[$i]['fechaProxima'])!=""){
                         
                         $vencimiento =DateTime::createFromFormat('d/m/Y', $partes[$i]["fechaProxima"]); 
                         $fechaActual = new DateTime('now');
@@ -86,25 +118,26 @@ function comprobarPartesVehiculos($vehiculoIncluido,$alertas){
                         $horasAntes=$alertas["horasAntes"];
                         //echo $vehiculoIncluido['idInterno']." - ".$partes[$i]['nombre']."->".$diffAños."->".$diffDias."->".$diffMeses."<br>";
 						
-                        if(isset($diasAntes)&&($diasAntes>=$diffDias)){
+                        if(isset($diasAntes)&&($diffDias>=$diasAntes)){
 							$listaPartesMail[]=$partes[$i];						
 						
                         }
-                        if(isset($mesesAntes)&&($mesesAntes>=$diffMeses)){
+                        if(isset($mesesAntes)&&($mesesAntes<=$diffMeses)){
                         }
                        
-                  }else if(isset($partes[$i]['kmFinal'])){ //VERIFICA LAS PARTES QUE TENGAN KM DE VENCIMIENTO
-					  
+                  }else if(isset($partes[$i]['kmFinal'])){ //VERIFICA LAS PARTES QUE TENGAN KM DE VENCIMIENTO	
+					if(trim($partes[$i]['kmFinal'])!=""){  
                         $query = "call buscar_vehiculo('".$vehiculoIncluido["idInterno"]."');";
                         $result = executeQuery($query);
 						$vehiculo=mysql_fetch_array($result);
 						$kmActual=$vehiculo['kilometros'];
 						$diffKm=$kmActual-$partes[$i]['kmFinal'];
 						
-						if($kmAntes>=$diffKm){
+						if($kmAntes<=$diffKm){
 							$listaPartesMail[]=$partes[$i];						
 							
 						} 
+					}
                   }
           }
         }
@@ -192,7 +225,7 @@ function enviarAlertas($vehiculo){
 	$pos=strpos($content,"TABLA -->");
 	$mail = substr_replace($content, $tablas, $pos+10, 0);
 	array_push($listaMail,"g.parodi@sermico.com.ar");	
-	enviarMail($listaMail,"Mantenimiento programado - ".$vehiculo["idInterno"],$mail);
+	//enviarMail($listaMail,"Mantenimiento programado - ".$vehiculo["idInterno"],$mail);
 	echo $mail;
 	
 	

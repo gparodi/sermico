@@ -44,4 +44,20 @@
       <!-- end .footer --></div>
   <!-- end .container --></div>
 </body>
-<!-- InstanceEnd --></html>
+<!-- InstanceEnd -->
+<script>
+$("#logout").on("click",this,function(){
+	sessionStorage.removeItem('user_name');
+
+	$.ajax({
+	url: 'Includes/logout.php',
+	type: 'POST',
+	success: function(response){
+		alert(response);
+		$(location).attr('href','index.php');
+	}
+	});
+	
+});
+</script>
+</html>

@@ -7,14 +7,13 @@
 <meta name="viewport" content="width=device-width">
 </head>
 <body>
+<button id="logout">Logout</button>
 <ul id="menu">
     <li><a href="index.php">Inicio</a></li>
     <li>
         <a href="vehiculos.php">Vehiculos</a>
         <ul>
             <li><a href="actualizar_km.php">Actualizar KM</a></li>
-            <li><a href="alta_partes.php">Agregar Parte</a></li>
-            <li><a href="documentacion.php">Documentacion</a></li>
         </ul>
     </li>
     <li><a href="mantenimiento.php">Mantenimiento</a>
@@ -27,7 +26,6 @@
     <li><a href="plan_mantenimiento.php">Plan de Mantenimiento</a>
     	<ul>
             <li><a href="alta_plan_mantenimiento.php">Nuevo plan</a></li>
-            <li><a href="#">Alertas programadas</a></li>
      	</ul>
      </li>
     <li><a href="prueba.php">Viajes</a>
@@ -37,13 +35,7 @@
             <li><a href="alta_historial_viajes.php">Control</a></li>
         </ul>
     </li>    
-    <li><a href="#">Conductores</a>	
-    	<ul>
-            <li><a href="#">Alta</a></li>
-        </ul>
-    </li>
-    <li><a href="#">Proveedores</a></li>
-    
+   
 </ul>
 </body>
 </html>
