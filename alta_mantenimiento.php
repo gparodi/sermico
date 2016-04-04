@@ -5,7 +5,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <!-- InstanceBeginEditable name="doctitle" -->
 <title>SERMICO SRL</title>
-
+<script src="Includes/JSON-js-master/json2.js"></script>
 <!-- InstanceEndEditable -->
 <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
 <script src="//code.jquery.com/jquery-1.10.2.js"></script>
@@ -34,14 +34,14 @@
 <select id="comboBoxFiltro"> </select>
 Vehiculo:
 <select id="comboBoxVehiculo">Vehiculo: </select>
-</div> 
+<p id="descripcionVehiculo"> </p>
+</div>
   
 
+<div id="nuevo_mantenimiento">
+<form id="formAltaMantenimiento">
 
-
-<form id="formAltaMantenimiento" action="" title="" method="post">
-
- <li> <label> Proveedores</label>
+ <li> <label> Proveedor</label>
  <input list="comboBoxProveedores" id="proveedores">
  <datalist id="comboBoxProveedores">
  </datalist>
@@ -66,99 +66,133 @@ Vehiculo:
  </select>
  </li>
  
-<li><label>Descripcion:</label>
+<li><label>Descripcion:</label></li>
 <li><textarea id="descripcion" cols="60" row="20"></textarea></li>
  
- <li> <button id="submitMantenimiento" type="submit" onclick="altaMantenimiento()">Agregar Mantenimiento</button> </li> 
+ <li> <button id="btnSubmitMantenimiento" type="submit" onclick="altaMantenimiento()">Cargar</button> </li> 
  
 </form>
+</div>
 
+
+
+<div id="detalleMantenimiento" style="display:none">
+
+
+<h2>Partes del vehiculo</h2>
+
+<h2>Componentes</h2>
+<div id="filtros">Filtrar por:
+<select id="comboBoxFiltroPartes"> </select>
+</div> 
+
+<table id="tablaPartes"><thead>
+<th>ID</th><th>Nombre</th><th>Colocacion(Km)</th><th>Vencimiento(Km)</th><th>Vencimiento(Fecha)</th></thead><tbody></tbody></table>
+
+
+
+<div id="tablaPartesMantenimientos">
+<h2>Partes incluidas en el mantenimiento</h2>
+<table id="tablaPartesMantenimientos"><thead>
+<th>ID</th><th>Nombre</th><th>Operacion</th><th>Detalles y Observaciones</th></thead>
+<tbody>
+
+</tbody>
+</table>
+</div>
+</div>
+
+<div id="detalles_Modal" style="display:none">
+<form id="form_detalles_partes" action="#">
+<li><label>Descripcion</label></li>
+<li><textarea id="descripcionParte" rows="5" cols="30"></textarea></li>
+
+<li><label>Observaciones</label></li>
+<li><textarea id="observacionesParte" rows="5" cols="30"></textarea></li>
+
+<button type="submit" id="btnDetallesPartes">Aceptar</button>
+
+</form>
+ 	
+</div>
+<button id="btnCommit" style="display:none">Cargar</button>
 <div id="prueba">
 
 </div>
 
 <script>
-$vehiculoActual=0;
+ 
+var $vehiculoActual;
+var $tipoPartes;
+var mantenimiento=[];
+var detalles=[];
+var parteActual;
 
-		//loadTableFromDb("#tablaPartesDePartes","cargarTablaPartesDePartes",'1','parte','1');
+
+		
 $(document).ready(function(e) {
-     
-
-   
+//FILTRO
+loadComboFromDB("#comboBoxProveedores","cargarComboBoxProveedores");
 loadComboFromDB("#comboBoxFiltro","cargarComboBoxTipos",function(){
 	var $tipo=$("#comboBoxFiltro").val();
 	loadComboFromDBWithType("#comboBoxVehiculo","getVehiculosPorTipo",$tipo,function(){
-			$.ajax({
-		url: 'Includes/FuncionesDB.php',
-		type: 'POST',
-		dataType:"json",
-		data: {tarea:"getVehiculo",idVehiculo:$vehiculoActual},
-		success: function(data) {
-			if(data.km!=null)
-				$("#km").val(parseFloat(data.km));
-			else
-				$("#km").val("");
-		},
-		error: function(){
-		alert('Error en combo');
-		}
-		});	
-
-	
-	
+	$vehiculoActual=$("#comboBoxVehiculo").val();
+	sendAjaxJson({tarea:"getVehiculo",idVehiculo:$vehiculoActual},function(dato){
+		$("#descripcionVehiculo").empty();
+		$("#descripcionVehiculo").append(dato.marca + " " + dato.modelo +"/"+dato.año);
+		$("#km").val(dato.km);
 	});
+	});
+	
 	
 });
 
-$("#comboBoxFiltro").on("input",function(){
-	
+$("#comboBoxFiltro").on("input",function(){	
 	
     var $tipo=$("#comboBoxFiltro").val();
 	loadComboFromDBWithType("#comboBoxVehiculo","getVehiculosPorTipo",$tipo,function(){
 	$vehiculoActual=$("#comboBoxVehiculo").val();
-	
-		$.ajax({
-		url: 'Includes/FuncionesDB.php',
-		type: 'POST',
-		dataType:"json",
-		data: {tarea:"getVehiculo",idVehiculo:$vehiculoActual},
-		success: function(data) {
-			if(data.km!=null)
-				$("#km").val(parseFloat(data.km));
-			else
-				$("#km").val("");
-		},
-		error: function(){
-		alert('Error en combo');
-		}
-		});	
+	 sendAjaxJson({tarea:"getVehiculo",idVehiculo:$vehiculoActual},function(dato){
+		$("#descripcionVehiculo").empty();
+		$("#descripcionVehiculo").append(dato.marca + " " + dato.modelo +"/"+dato.año);
+		$("#km").val(dato.km);
 	});
+	});
+	
+	
 	
 });
 
 $("#comboBoxVehiculo").on("click",this,function(){
 	$vehiculoActual=$("#comboBoxVehiculo").val();
-			$.ajax({
-		url: 'Includes/FuncionesDB.php',
-		type: 'POST',
-		dataType:"json",
-		data: {tarea:"getVehiculo",idVehiculo:$vehiculoActual},
-		success: function(data) {
-			if(data.km!=null)
-				$("#km").val(parseFloat(data.km));
-			else
-				$("#km").val("");
-		},	
-		error: function(){
-		alert('Error en combo');
-		}
-		});	
-
+	$("#tablaMantenimiento").find("tr:gt(0)").remove();
+	sendAjaxJson({tarea:"getVehiculo",idVehiculo:$vehiculoActual},function(dato){
+		$("#descripcionVehiculo").empty();
+		$("#descripcionVehiculo").append(dato.marca + " " + dato.modelo +"/"+dato.año);
+		$("#km").val(dato.km);
+	});
+	
 });
+//---FIN FILTRO 
 
 
-//loadComboFromDB("#comboBoxVechiculoMantenimiento","cargarComboBoxVehiculos");
-loadComboFromDB("#comboBoxProveedores","cargarComboBoxProveedores");
+
+
+
+
+function cargarDetallesMantenimiento(){
+	$("#detalleMantenimiento").css("display","block");
+	loadComboFromDB("#comboBoxFiltroPartes","cargarComboBoxTiposPartes",function(){	
+		$tipoPartes=$("#comboBoxFiltroPartes").val();
+		loadTableFromDb("#tablaPartes","cargarTablaPartes",$tipoPartes,$vehiculoActual);
+		$('html,body').animate({
+			scrollTop: $("#detalleMantenimiento").offset().top
+		}, 2000);
+	});
+	
+}
+
+
 
 var now = new Date();
 
@@ -171,10 +205,6 @@ $('#fechaInicio').val(today);
 $('#fechaFin').val(today);
 
 
-
-
-	
-	
 $("#formAltaMantenimiento").on("submit",this,function(e){	
 e.preventDefault();
 var $idMantenimiento;
@@ -187,55 +217,18 @@ var $precio=$("#precio").val();
 var $estado=$("#estados").val();
 var $vehiculo=$("#comboBoxVehiculo").val();
 var $descripcion=$("#descripcion").val();
+$("#btnCommit").css("display","block");
+$("#btnSubmitMantenimiento").css("display","none");
+	
+	mantenimiento={tarea:"altaMantenimiento",nuevoMantenimiento:[{vehiculo:$vehiculo,titulo:$titulo,proveedor:$proveedor,fechaInicio:$fechaInicio,fechaFin:$fechaFin,km:$km,precio:$precio,estado:$estado,descripcion:$descripcion}],partes:[]};
+	cargarDetallesMantenimiento();
 
-
-///,titulo:$titulo,proveedor:$proveedor,fechaInicio:$fechaInicio,fechaFin:$fechaFin,km:$km,precio:$precio,estado:$estado	
-
-	$.ajax({
-	url: 'Includes/FuncionesDB.php',
-	type: 'POST',
-	async:true,
-	dataType:'json',
-	data: {tarea:"altaMantenimiento",vehiculo:$vehiculo,titulo:$titulo,proveedor:$proveedor,fechaInicio:$fechaInicio,fechaFin:$fechaFin,km:$km,precio:$precio,estado:$estado,descripcion:$descripcion},
-	timeout:1000,
-	success: function(data, textStatus, jqXHR) {
-		
-		localStorage['vehiculo']=$vehiculo;
-		localStorage['idMantenimiento']=data.id;
-		var $idMantenimiento=data.id;
-		
-		if (confirm('¿Desea agregar multiples tareas al mantenimiento?')){ 
-    		$(location).attr('href','alta_partes_mantenimiento.php');
-    	}else{
-			$.ajax({
-				url: 'Includes/FuncionesDB.php',
-				type: 'POST',
-				async:true,
-				dataType:'html',
-				data: {tarea:"altaPartesMantenimiento",descripcion:"",observaciones:"",idPartes:"-",idMantenimiento:$idMantenimiento,operacion:"",vehiculo:$vehiculo},
-				timeout:5000,
-				success: function(data, textStatus, jqXHR) {
-					$("#prueba").append(data);			
-					
-				},
-				error: function( obj,text,error ){
-					
-				}
-				});
-			//$(location).attr('href','alta_mantenimiento.php');	
-		}
-		
-	},
-	error: function( obj,text,error ){
-		alert(text);
-	}
-	});
 	
 	
 	
 });
 
- $("#proveedores").on("focusout",this,function(e){
+ function altaProveedor(){
 	var $proveedor=$(this).val();
 	if($proveedor!=""){
 		$.ajax({
@@ -246,10 +239,171 @@ var $descripcion=$("#descripcion").val();
 		data: {tarea:"altaProveedorSimple",nombre:$proveedor}
 		});
 	}
- });
- });
+ }
+ 
+
+ 
+
+
+
+
+
+	
+	//FILTRO PARTES
+	
+
+$("#comboBoxFiltroPartes").on("input",function(){	
+	
+    $tipoPartes=$("#comboBoxFiltroPartes").val();
+	loadTableFromDb("#tablaPartes","cargarTablaPartes",$tipoPartes,$vehiculoActual);
+		
+	
+});
+
+
+//---FIN FILTRO
+
+
+
+   
+
+
+$("#tablaPartes").on("click", ".addParte", function(){
+
+	var $row = jQuery(this).closest('tr');
+    var $columns = $row.find('td');
+
+    var values = '<tr>';
+    jQuery.each($columns, function(i, item) {
+		if(i<=1){
+        	values = values +"<td>"+ item.innerHTML + "</td>" ;
+		}
+		
+    });
+	
+	values+="<td><select class=\"sltOperacion\"><option>Cambio</option><option>Reparacion</option><option>Limpieza</option><option>Inspeccion</option><option>Renovacion</option></select></td>";
+	values +="<td><button class=\"detalleParte\"><img src=\"Imagenes/details.png\" width=\"20\" height=\"20 \" /></button></td>";
+	values +="<td><button class=\"deleteParte\"><img src=\"Imagenes/minus.png\" width=\"20\" height=\"20 \" /></button></td>";
+	
+	values += '</tr>';
+	$("#tablaPartesMantenimientos > tbody:last").append(values);
+	$(this).closest ('tr').remove ();
+});
+
+
+
+
+$("#tablaPartesMantenimientos").on("click", ".deleteParte", function(){
+	
+	var $row = jQuery(this).closest('tr');
+    var $columns = $row.find('td');
+	var idPartesDelete=0;
+	
+     var values = '<tr>';
+    jQuery.each($columns, function(i, item) {
+		if(i<=1){
+        	values = values +"<td>"+ item.innerHTML + "</td>" ;
+			if(i==0){
+				idPartesDelete=item.innerHTML;
+			}
+		}
+		
+    });
+	$.each(detalles,function(index,item){
+		if(idPartesDelete==item.idPartes){
+			detalles.splice(index,1);	
+		}
+		//alert(detalles.index.descripcion);
+	});
+	$(this).closest ('tr').remove ();
+});
+
+$("#tablaPartesMantenimientos").on("click", ".detalleParte", function(){
+
+	var $row = jQuery(this).closest('tr');
+    var $columns = $row.find('td');
+
+   
+    jQuery.each($columns, function(i, item) {
+		if(i==0){
+        	parteActual=item.innerHTML;
+		}
+		
+		
+    });
+	$("#descripcionParte").val("");
+	$("#observacionesParte").val("");
+	$('#detalles_Modal').dialog({
+			 resizable: false,
+			 title: "Agregar detalles a mantenimiento",
+			  height:500,
+			  width:900,
+			  modal: true,
+      		
+    	});
+	
+});
+
+function cerrarModalPartes(){
+	$("#detalles_Modal").dialog("close");
+}
+
+$("#form_detalles_partes").on("submit",this,function(e){
+	e.preventDefault();
+	var descripcion=$("#descripcionParte").val();
+	var observaciones=$("#observacionesParte").val();
+	cerrarModalPartes();
+	detalles.push({idPartes:parteActual,descripcion:descripcion,observaciones:observaciones});
+	
+	
+	
+});
+
+$("#btnCommit").on("click",this,function(){
+	var id;
+	var operacion;
+	$("#tablaPartesMantenimientos tbody tr").each(function(index, element) {
+    	$(element).children("td").each(function(i, item) {
+			switch(i){
+            	case 0:
+						id=item.innerHTML;
+				break;
+				case 2:
+						operacion=$(item).children("select").val();
+				break;
+			}  		
+				
+			
+        });
+		if(detalles.length!=0){
+		$.each(detalles,function(j,item1){
+			if(id==item1.idPartes){
+			mantenimiento.partes.push({idPartes:id,operacion:operacion,descripcion:item1.descripcion,observaciones:item1.observaciones});	
+			}else{
+				mantenimiento.partes.push({idPartes:id,operacion:operacion,descripcion:null,observaciones:null});
+			}
+			});
+		}
+		else{
+			mantenimiento.partes.push({idPartes:id,operacion:operacion,descripcion:null,observaciones:null});
+		}
+	});
+	$("#prueba").empty();
+	$("#prueba").append(JSON.stringify(mantenimiento));
+	sendAjaxHtml(mantenimiento,function(data){
+		$("#prueba").append(data);
+	});
+	altaProveedor();
+	//$(location).attr('href','alta_mantenimiento.php');
+		
+    });
+	
+	
+
+
+});
+
 </script>  
-  
   <!-- InstanceEndEditable -->
   <div class="footer">
       

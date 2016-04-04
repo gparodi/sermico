@@ -29,64 +29,32 @@
 <div class="container">
     
   <!-- InstanceBeginEditable name="EditRegion2" -->
-  
  
 
 
-<div id="tablaPartes">
-<h2>Partes del vehiculo</h2>
-<table id="tablaPartes"><thead><tr>
-	<th class="headcol">ID</th><th>Nombre</th><th>Operacion</th>
-	</tr></thead><tbody>
-    
-    </tbody>
-</table>
-</div>
 
-<div id="tablaPartesDePartes">
-<h2>Partes que componen partes</h2>
-<table id="tablaPartesDePartes"><tr>
-	<th>ID</th><th>Nombre</th>
-	</tr>
-</table>
-</div>
+
+<h2>Partes del vehiculo</h2>
+
+<h2>Componentes</h2>
+<div id="filtros">Filtrar por:
+<select id="comboBoxFiltroPartes"> </select>
+</div> 
+
+<table id="tablaPartes"><thead>
+<th>ID</th><th>Nombre</th><th>Colocacion(Km)</th><th>Vencimiento(Km)</th><th>Vencimiento(Fecha)</th></thead><tbody></tbody></table>
+
 
 
 <div id="tablaPartesMantenimientos">
 <h2>Partes incluidas en el mantenimiento</h2>
-<table id="tablaPartesMantenimientos"><tr>
-<th>ID</th><th>Nombre</th></tr>
+<table id="tablaPartesMantenimientos"><thead>
+<th>ID</th><th>Nombre</th><th>Operacion</th><th>Detalles y Observaciones</th></thead>
+<tbody>
 
+</tbody>
 </table>
 </div>
-
-<h2>Descripcion del mantenimiento</h2>
-<form id="formAltaMatenimiento" action="" title="" method="post">
- <li> <label>Parte:</label>
- <input type="text" id="parteSeleccionada"/> </li>
- <li><label>Operacion:</label>
- <select id="operaciones"> 
- <option>Reparacion</option>
- <option>Cambio</option>
- <option>Revision</option>
-  <option>Limpieza</option>
- </select>
- </li> 
- 
-  <li>  <label>Descripcion:</label> </li>
-  <li>
- <textarea id="descripcion" rows="10" cols="40"></textarea> </li> 
- <li> <label>Observaciones:</label> </li>
- <li> <textarea id="observaciones" rows="10" cols="40"></textarea></li>
-
-
-<li> <button id="submitParte" type="submit">Cargar</button> 
- <button id="submitFin" type="submit">Finalizar</button> </li>
-</form>
-
-
-
-
 
 
 
@@ -97,10 +65,29 @@ $idMantenimiento=localStorage['idMantenimiento'];
 var idTablaPartes=[];
 var idTablaPartesDePartes=[];
 var idParteActual=0;
+var $tipoPartes;
+
 $(document).ready(function(e) {
 	
-    
-    loadTable("#tablaPartes tr:last","cargarTablaPartes",$vehiculoActual,'parte');
+	//FILTRO PARTES
+	loadComboFromDB("#comboBoxFiltroPartes","cargarComboBoxTiposPartes",function(){
+	$tipoPartes=$("#comboBoxFiltroPartes").val();
+	loadTableFromDb("#tablaPartes","cargarTablaPartes",$tipoPartes,$vehiculoActual);
+	
+		
+});
+
+$("#comboBoxFiltroPartes").on("input",function(){	
+	
+    $tipoPartes=$("#comboBoxFiltroPartes").val();
+	loadTableFromDb("#tablaPartes","cargarTablaPartes",$tipoPartes,$vehiculoActual);
+		
+	
+});
+
+
+//---FIN FILTRO
+   
 	/*	
 	var personaGuardada = localStorage.getItem("persona");
 	var personaGuardada = JSON.parse(personaGuardada);
@@ -111,6 +98,15 @@ $(document).ready(function(e) {
 });
 
 
+$('#tablaPartes').not("first").on( 'click', 'td', function (e) {
+	
+	$('tr.seleccionFila:first').removeClass("seleccionFila");
+   	$(this).closest("tr").addClass("seleccionFila");
+	
+	
+});
+
+/*
 $('#tablaPartesMantenimientos').on( 'click', 'td', function (e) {
 	var $row = jQuery(this).closest('tr');
     var $columns = $row.find('td');
@@ -126,7 +122,7 @@ $('#tablaPartesMantenimientos').on( 'click', 'td', function (e) {
 	$("#parteSeleccionada").val(values.toString());
 	 
 } );
-
+*/
 
 
 $("#formAltaMatenimiento").on("submit",this,function(e){
@@ -176,7 +172,7 @@ $("#submitFin").on("click",this,function(e){
 
 
 
- 
+ /*
 $('#tablaPartes').on( 'click', 'td', function (e) {
 	
 	var $idParte=$(this).closest('tr').find('td:eq(0)').html();
@@ -198,9 +194,9 @@ $('#tablaPartes').on( 'click', 'td', function (e) {
 	
 	
 	 
-} );
+} );*/
 
-
+/*
 
 $("#tablaPartesDePartes").on("click", ".addParte", function(){
 	
@@ -210,7 +206,8 @@ $("#tablaPartesDePartes").on("click", ".addParte", function(){
     var values = '<tr>';
     jQuery.each($columns, function(i, item) {
 		if(i<=1){
-        	values = values +"<td>"+ item.innerHTML + "</td>" ;
+        	values = values +"<td>"+ item.innerHTML + "</td>";
+			
 			if(i==0){
 				idTablaPartesDePartes.push(item.innerHTML);
 			}
@@ -218,13 +215,13 @@ $("#tablaPartesDePartes").on("click", ".addParte", function(){
 		
     });
 	
-	values +="<td><button class=\"deleteParte\">Quitar Parte</button></td>";
+	values +="<td><button class=\"deleteParte\"><img src=\"Imagenes/add.png\" width=\"20\" height=\"20 \" /></button></td>";
 	values += '</tr>';
 	$("#tablaPartesMantenimientos tr:last").after(values);
 	$(this).closest ('tr').remove ();
 });
 
-
+*/
 
 $("#tablaPartes").on("click", ".addParte", function(){
 	
@@ -242,9 +239,12 @@ $("#tablaPartes").on("click", ".addParte", function(){
 		
     });
 	
-	values +="<td><button class=\"deleteParte\">Quitar Parte</button></td>";
+	values+="<td><select class=\"sltOperacion\"><option>Reparacion</option><option>Reparacion</option><option>Reparacion</option><option>Reparacion</option><option>Reparacion</option></select></td>";
+	values +="<td><button class=\"detalleParte\"><img src=\"Imagenes/details.png\" width=\"20\" height=\"20 \" /></button></td>";
+	values +="<td><button class=\"deleteParte\"><img src=\"Imagenes/minus.png\" width=\"20\" height=\"20 \" /></button></td>";
+	
 	values += '</tr>';
-	$("#tablaPartesMantenimientos tr:last").after(values);
+	$("#tablaPartesMantenimientos > tbody:last").append(values);
 	$(this).closest ('tr').remove ();
 });
 
@@ -265,13 +265,6 @@ $("#tablaPartesMantenimientos").on("click", ".deleteParte", function(){
 		
     });
 	
-	values +="</td><td><button class=\"addParte\">Agregar Parte</button></td>";
-	values += '</tr>';
-	if(idTablaPartesDePartes.indexOf(idPartes)==-1){
-		$("#tablaPartes tr:last").after(values);
-	}else{
-		$("#tablaPartesDePartes tr:last").after(values);
-	}
 	$(this).closest ('tr').remove ();
 });
 

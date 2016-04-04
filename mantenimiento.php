@@ -35,15 +35,26 @@ Vehiculo:
 <select id="comboBoxVehiculo">Vehiculo: </select>
 <p id="descripcionVehiculo"> </p>
 </div>
+
+<button id="btn_nuevoMantenimiento">Nuevo mantenimiento</button>
+<button id="btn_nuevoPlanMantenimiento">Ejecutar mantenimiento</button>
+<button id="btn_mantenimientoProgramado">Mantenimiento Programado</button>
   
 <h2>Mantenimientos realizados</h2>
 
+<div id="planes_mantenimiento" style="display:none">
 
+</div>
+<div id="mantenimiento_programados" style="display:none">
 
-<table id="tablaMantenimientos"><tr>
-	<td>ID</td><td>Titulo</td><td>Proveedor</td><td>KM</td><td>Fecha de Inicio</td>
-    <td>Fecha de Fin</td><td>Horas</td><td>Precio($)</td><td>Estado</td>
-	</tr>
+</div>
+
+<table id="tablaMantenimientos"><thead>
+	<th>ID</th><th>Titulo</th><th>Proveedor</th><th>KM</th><th>Fecha de Inicio</th>
+    <th>Fecha de Fin</th><th>Horas</th><th>Precio($)</th><th>Estado</th>
+	</thead><tbody>
+    
+    </tbody>
     
 </table>
 
@@ -57,24 +68,27 @@ Vehiculo:
 <li><textarea id="descripcion" cols="60" row="20" readonly="readonly"></textarea></li>
 
 
-<button id="botonDetalles" style="display:none"> Ver detalles </button>
+<button id="btnDetalles" style="display:none"> Ver detalles </button>
 
 <div id="detallesMantenimiento" style="display:none">
 
 <h2>Partes incluidas en el mantenimiento</h2>
-<table id="tablaPartesMantenimientos"><tr>
-	<th>ID</th><th>Nombre</th></tr>
+<table id="tablaPartesMantenimientos"><thead>
+	<th>ID</th><th>Nombre</th></thead>
+    <tbody>
+    </tbody>
 </table>
 
 
 <h2>Descripcion del mantenimiento</h2>
- <li> <label>Parte:</label><input type="text" id="parteSeleccionada"/></li>
- <li><label>Operacion:</label><input type="text" id="operacionParte"/></li> 
+<form id="detallesParte">
+ <li> <label>Parte:</label><input type="text" id="parteSeleccionada" readonly="readonly"/></li>
+ <li><label>Operacion:</label><input type="text" id="operacionParte" readonly="readonly"/></li> 
   <li>  <label>Descripcion:</label> </li>
-  <li><textarea id="descripcionParte" rows="10" cols="40"></textarea> </li> 
+  <li><textarea id="descripcionParte" rows="10" cols="40" readonly="readonly"></textarea> </li> 
  <li> <label>Observaciones:</label> </li>
- <li> <textarea id="observacionesParte" rows="10" cols="40"></textarea></li>
-
+ <li> <textarea id="observacionesParte" rows="10" cols="40" readonly="readonly"></textarea></li>
+</form>
 </div>
 
 
@@ -82,8 +96,11 @@ Vehiculo:
 
  //FILTRO
 var $vehiculoActual;
-var estadoDetalle=1;
+var estadoDetalle='A';
 var datosPartes;
+$(document).ready(function(e) {
+    
+
 loadComboFromDB("#comboBoxFiltro","cargarComboBoxTipos",function(){
 	var $tipo=$("#comboBoxFiltro").val();
 	loadComboFromDBWithType("#comboBoxVehiculo","getVehiculosPorTipo",$tipo,function(){
@@ -126,10 +143,12 @@ $("#comboBoxVehiculo").on("click",this,function(){
 //---FIN FILTRO
 
 
-$('#tablaMantenimientos').on( 'click', 'td', function (e) {
+$('#tablaMantenimientos :not(first)').on( 'click', 'td', function (e) {
 	$("#descripcion").val("");
 	var $row = jQuery(this).closest('tr');
     var $columns = $row.find('td');
+	$('tr.seleccionFila:first').removeClass("seleccionFila");
+   	$(this).closest("tr").addClass("seleccionFila");
 	jQuery.each($columns, function(i, item) {
 		if(i<=0){
         	values = item.innerHTML ;
@@ -137,19 +156,21 @@ $('#tablaMantenimientos').on( 'click', 'td', function (e) {
 				idParteActual=item.innerHTML;
 			}
 		}
-		
+		cleanForm("#detallesParte");
     });
 	
 	function detallesMantenimiento(data){
+
 		$("#descripcion").val(data.descripcion);
 		$("#proveedor").val(data.proveedor);		
-		//sendAjaxJson({tarea:'getPartesPorMantenimiento',idMantenimiento:"5"},verPartesPorMantenimiento);
+		
 	}
 	function verPartesPorMantenimiento(data){
-			
 		if(data.operacion=="OK"){
-			$("#botonDetalles").css({'display':'block'});		
-			$("#botonDetalles").text("Ver detalles");
+			if(!$("#detallesMantenimiento").is(":visible")){
+				$("#btnDetalles").css({'display':'block'});		
+				$("#btnDetalles").text("Ver detalles");
+			}
 			var size=Object.keys(data).length;
 			datosPartes=data;
 			$("#tablaPartesMantenimientos tr").each(function(index, element) {
@@ -160,13 +181,13 @@ $('#tablaMantenimientos').on( 'click', 'td', function (e) {
 			$.each(data,function(index,element){
 				if(index<size){
 					
-					$("#tablaPartesMantenimientos tr:last").after("<tr><td>"+element.idPartes+"</td><td>"+element.nombre+"</td></tr>");
+					$("#tablaPartesMantenimientos tbody:last").append("<tr><td>"+element.idPartes+"</td><td>"+element.nombre+"</td></tr>");
 				}
 			});
 			
 		}else{
 			
-			$("#botonDetalles").css({'display':'none'});
+			$("#btnDetalles").css({'display':'none'});
 			$("#detallesMantenimiento").css({'display':'none'});
 		}
 		
@@ -174,16 +195,21 @@ $('#tablaMantenimientos').on( 'click', 'td', function (e) {
 	}
 	
 	sendAjaxJson({tarea:'getMantenimiento',idMantenimiento:values},detallesMantenimiento);
+	
 	sendAjaxJson({tarea:'getPartesPorMantenimiento',idMantenimiento:values},verPartesPorMantenimiento);
 	
-	$("#botonDetalles").on("click",this,function(){
-		if($("#botonDetalles").text()=="Ver detalles"){
+} );
+	$("#btnDetalles").on("click",function(){
+		if(estadoDetalle=='A'){
 			$("#detallesMantenimiento").css({'display':'block'});
-			estadoDetalle=0;
+			$('html,body').animate({
+			scrollTop: $("#detallesMantenimiento").offset().top
+			}, 2000);
+			estadoDetalle='D';
 			$(this).text("Ocultar detalles");
-		} else if(estadoDetalle==0){
+		} else {
 			$("#detallesMantenimiento").css({'display':'none'});
-			estadoDetalle=1;
+			estadoDetalle='A';
 			$(this).text("Ver detalles");
 		}
 			
@@ -191,7 +217,7 @@ $('#tablaMantenimientos').on( 'click', 'td', function (e) {
 	});
 	
 	 
-} );
+
 
 $('#tablaPartesMantenimientos').on( 'click', 'td', function (e) {
 	var $row = jQuery(this).closest('tr');
@@ -209,11 +235,53 @@ $('#tablaPartesMantenimientos').on( 'click', 'td', function (e) {
 	$.each(datosPartes,function(index,element){
 		if(element.idPartes==idParteActual){
 			$("#descripcionParte").val(element.descripcion);
+			$("#observacionesParte").val(element.observaciones);
+			$("#operacionParte").val(element.operacion);
 		}
 	});
 	 
 } );
 
+});
+/*
+
+ $("#btn_nuevoMantenimiento").on("click",this,function(){
+	$("#nuevo_mantenimiento").css("display","block"); 
+	 
+ });
+ 
+ $("#btn_mantenimientoProgramado").on("click",this,function(){
+	$("#nuevo_mantenimiento").css("display","none");
+	$("#mantenimiento_programados").css("display","block");
+	mantenimientoProgramado();
+	 
+ });
+ 
+ function mantenimientoProgramado(){
+	sendAjaxHtml({tarea:'getMantenimientoProgramado','idVehiculo':$vehiculoActual},function(data){
+		$("#mantenimiento_programados").empty();
+		$("#mantenimiento_programados").append(data);
+		
+	});
+ }
+ 
+ $("#mantenimiento_programados").on("click","#btn_borrar_mp",function(){
+	var idMantenimiento=$(this).parent().attr("id").toString(); 
+	sendAjaxHtml({tarea:"borrar_mantenimiento","idMantenimiento":idMantenimiento},function(data){
+		$("#prueba").append(data);
+	});
+	mantenimientoProgramado();
+ });
+ 
+ $("#mantenimiento_programados").on("click","#btn_ejecutar_mp",function(){
+	var idMantenimiento=$(this).parent().attr("id").toString(); 
+	sendAjaxHtml({tarea:"ejecutar_mantenimientoProgramado","idMantenimiento":idMantenimiento},function(data){
+		$("#prueba").append(data);
+	});
+	mantenimientoProgramado();
+ });
+ 
+*/
 
 </script>
 

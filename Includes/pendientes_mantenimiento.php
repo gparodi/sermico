@@ -1,4 +1,5 @@
 <?php
+	require ("db.php");
 	$listaplanes=array();
 	//BUSCA TODOS LOS PLANES DE MANTENIMIENTO
 	$query = "call listar_planes_mantenimiento();";
@@ -160,26 +161,6 @@ function comprobarTareas($vehiculo,$plan,$alertas){
 	
 }
 
-function executeQuery($query){
-
-	$host = gethostbyaddr($_SERVER['SERVER_ADDR']);	
-	$str_datos = file_get_contents("datos.json",FILE_USE_INCLUDE_PATH);
-	$datos = json_decode($str_datos,true);
-	$dbPass=$datos[$host]["Pass"];
-	$user=$datos[$host]["User"];
-	$dbname="control_vehiculos";
-	
-	$link = @mysql_connect("localhost",$user,$dbPass)
-		  or die ("Error al conectar a la base de datos.");
-	  @mysql_select_db($dbname, $link)
-		  or die ("Error al conectar a la base de datos");
-	
-	  $result = mysql_query($query);
-	  mysql_close($link);
-	  return $result;
-	
-}
-	
 
 
 ?>

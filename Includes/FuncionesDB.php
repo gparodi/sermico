@@ -81,6 +81,10 @@ case 'borrarParte':
 case 'updatePartes':
 		updatePartes();
 		break;
+		
+case 'modificarPartesVehiculo':
+		modificarPartesVehiculo();
+		break;
 
 //-----FIN PARTES DE VEHICULOS
 //---------------- MANTENIMIENTO---------------///
@@ -102,6 +106,16 @@ case 'getPartesPorMantenimiento':
 
 case 'getMantenimiento':
 		getMantenimiento();
+		break;
+		
+case 'getMantenimientoProgramado':
+		getMantenimientoProgramado();
+		break;
+case 'borrar_mantenimiento':
+		borrar_mantenimiento();
+		break;
+case 	'ejecutar_mantenimientoProgramado':
+		ejecutar_mantenimientoProgramado();
 		break;
 
 //-----FIN MANTENIMIENTO
@@ -538,13 +552,7 @@ function cargarTablaVehiculosPartes(){
 		$tabla=$tabla. "<td>" . 
 			$row["kmFinal"] . "</td>";
 		$tabla=$tabla. "<td>" . 
-			$row["fechaInicial"]. "</td>";
-		$tabla=$tabla. "<td>" . 
-			$row["fechaProxima"] . "</td>";
-		$tabla=$tabla. "<td>" . 
-			$row["descripcion"] . "</td>";
-		$tabla=$tabla. "<td>" . 
-			$row["especificaciones"] . "</td></tr>";
+			$row["fechaProxima"] . "</td></tr>";
 		
 		
 	  }
@@ -744,6 +752,29 @@ function borrarVehiculo(){
 
 //---------------- PARTES DE VEHICULOS---------------///
 
+
+function modificarPartesVehiculo(){
+	$idParte=$_POST["idParte"];
+	$nombre=$_POST["nombre"];
+	$kmInicial=$_POST["kmInicial"];
+	$kmFinal=$_POST["kmFinal"];
+	$fechaInicio=$_POST["fechaInicio"];
+	$fechaFin=$_POST["fechaFin"];
+	$descripcion=$_POST["descripcion"];	
+	$especificaciones=$_POST["especificaciones"];
+	
+	$query = "CALL modificar_parte(".$idParte.",'".$nombre."','".$kmInicial."','".$kmFinal."','".$fechaInicio."','".$fechaFin."','".$descripcion."','".$especificaciones."');";
+	$result = executeQuery($query);
+	if(mysql_num_rows($result) > 0){
+		$row = mysql_fetch_array($result);
+		
+	}
+		echo $query;
+	
+	
+	
+}
+
 function altaPartesVehiculo(){
 
 	$padre=$_POST["padre"];
@@ -787,11 +818,10 @@ function getPartes(){
 	$idparte=$_POST["idparte"];
 	$query = "CALL buscar_partes(".$idparte.")";
 	$result = executeQuery($query);
-	echo $query;
 	if(mysql_num_rows($result) != 0){
 		while($row = mysql_fetch_array($result))
 	 	 {
-			$parte=array("nombre"=>$nombre,"tipo"=>$tipo,"kmInicial"=>$kmInicial,"kmFinal"=>$kmFinal,"fechaInicial"=>$fechaInicial,"fechaProxima"=>$fechaProxima,"descripcion"=>$descripcion,"especificaciones"=>$especificaciones);
+			$parte=array("nombre"=>$row['nombre'],"tipo"=>$row['tipo'],"kmInicial"=>$row['kmInicial'],"kmFinal"=>$row['kmFinal'],"fechaInicial"=>$row['fechaInicial'],"fechaVencimiento"=>$row['fechaProxima'],"descripcion"=>$row['descripcion'],"especificaciones"=>$row['especificaciones']);
 				
 	  	}
 	  	echo json_encode($parte);
@@ -800,29 +830,38 @@ function getPartes(){
 }
 	
 
-function cargarTablaPartes($vehiculo,$tipo){
+function cargarTablaPartes(){
 	
-	
+	$tipo=$_POST["atributo1"];
+	$vehiculo=$_POST["atributo2"];
 	  $query = "CALL listar_partes('".$vehiculo."',0,'".$tipo."')";
 	  $result = executeQuery($query);
 	  $tabla="";
-	  echo $query;
-	  if(mysql_num_rows($result) != 0){
+	   
 	while($row = mysql_fetch_array($result))
 	  {
-		$tabla=$tabla."<tr><td>". 
-			$row["idpartes"] . "</td><td>".$row["nombre"]."</td>";
-			$tabla=$tabla."<td><button class=\"addParte\">Agregar Parte</button></td>";
-			$tabla=$tabla."</tr>";
-				
+		$tabla=$tabla."<tr><td>" . 
+		$row["idpartes"] . "</td>";
+		$tabla=$tabla. "<td>" . 
+		$row["nombre"] . "</td>";
+		$tabla=$tabla. "<td>" .
+		$row["kmInicial"] . "</td>";
+		$tabla=$tabla. "<td>" . 
+		$row["kmFinal"] . "</td>";
+		$tabla=$tabla. "<td>" . 
+		$row["fechaProxima"] . "</td>";
+		$tabla=$tabla."<td><button class=\"addParte\"><img src=\"Imagenes/add.png\" width=\"20\" height=\"20 \" /></button></td></tr>";
+		
+		
 	  }
-	  }else{
-		echo $query;
+	  if($tabla==""){
+		  $tabla=$tabla."<tr ><td colspan=\"9\">No hay informacion para mostrar</td></tr>";
 	  }
-	  
 	 echo $tabla;
+		 	
 
-	  return;
+	  return;	
+	
 }
 
 function borrarParte(){
@@ -832,13 +871,13 @@ function borrarParte(){
 		$row = mysql_fetch_array($result);
 		
 		if($row["resultado"]=="OK"){
-			echo "El vehiculo fue eliminado con exito";	
+			echo "El componente fue eliminado con exito";	
 		}else{
-			echo "No es posible borrar este vehiculo debido a que existen datos relacionados con el mismo. Por favor comuniquese con el administrador";
+			echo "No es posible borrar este componente debido a que existen datos relacionados con el mismo. Por favor comuniquese con el administrador";
 		}
 		
 	}else{
-		echo "No es posible borrar este vehiculo debido a que existen datos relacionados con el mismo. Por favor comuniquese con el administrador";
+		echo "No es posible borrar este componente debido a que existen datos relacionados con el mismo. Por favor comuniquese con el administrador";
 		
 	}
 	
@@ -870,28 +909,7 @@ function cargarTablaDocumentacion(){
 }
 
 
-function cargarTablaPartesDePartes($vehiculo,$tipo,$parte){
-	
-	
-	  $query = "CALL listar_partes_de_partes(".$vehiculo.",".$parte.",".$tipo.")";
-	  
-	  $result = executeQuery($query);
-	   $tabla= "";	
-	 if(!empty($result)){
-		while($row = mysql_fetch_array($result))
-		  {
-			$tabla=$tabla."<tr><td>". 
-			$row["idpartes"] . "</td><td>".$row["nombre"]."</td>";
-				$tabla=$tabla."<td><button class=\"addParte\">Añadir Parte</button></td>";
-				$tabla=$tabla."</tr>";	
-					
-		  }
-	 	//echo $query;
-	 echo $tabla;
-	   }
-	//echo $query;
-	  return;
-}
+
 
 function modificarDocumentacion(){
 	$idParte=$_POST["idParte"];
@@ -910,6 +928,15 @@ function modificarDocumentacion(){
 
 
 //---------------- MANTENIMIENTO---------------///
+function borrar_mantenimiento(){
+	$idMantenimiento=$_POST["idMantenimiento"];
+	$query = "CALL borrar_mantenimiento(".$idMantenimiento.");";
+	$result = executeQuery($query);
+	echo $query;
+	echo "OK";
+}
+
+
 
 //-------CARGAR TABLA MANTENIMENTO
 function cargarTablaMantenimiento($vehiculo){
@@ -951,8 +978,8 @@ function getPartesPorMantenimiento(){
 	$result = executeQuery($query);
 	if(mysql_num_rows($result)>0){
 	$partes["operacion"]="OK";
-		 while($row = mysql_fetch_array($result))
-		{
+	while($row = mysql_fetch_array($result))
+		{	
 				$nombre=$row["nombre"];
 				$idPartes=$row["idpartes"];
 				$partesIdPartes=$row["partes_idpartes"];			
@@ -964,11 +991,8 @@ function getPartesPorMantenimiento(){
 				$parte=array("idPartes"=>$idPartes,"partesIdPartes"=>$partesIdPartes,"nombre"=>$nombre,"tipo"=>$tipo,"operacion"=>$operacion,"descripcion"=>$descripcion,"observaciones"=>$observaciones);
 				$partes[]=$parte;
 				
-		}
-		
-		if($nombre!="-"){
-	
-			
+		}		
+		if($nombre!="-"){			
 			echo json_encode($partes);
 		}else{
 			$respuesta=array("operacion"=>"NOK");
@@ -984,14 +1008,100 @@ function getPartesPorMantenimiento(){
 	
 }
 
+function ejecutar_mantenimientoProgramado(){
+	$idMantenimiento=$_POST["idMantenimiento"];
+	$query = "CALL buscar_mantenimiento(".$idMantenimiento.",null,null);";
+	$result = executeQuery($query);
+	$mantenimiento=array();	
+	$partesMantenimiento=array();
+	if(mysql_num_rows($result)>0){
+		while($row = mysql_fetch_array($result)){
+			$mantenimiento=$row;			
+		}
+		$query = "CALL listar_partes_por_mantenimiento(".$mantenimiento["idmantenimiento"].");";
+		$result = executeQuery($query);
+		if(mysql_num_rows($result)>0){
+			while($partesPorMantenimiento = mysql_fetch_array($result)){
+				$query = "CALL buscar_parte(".$partesPorMantenimiento["idpartes"].");";
+				$resultPartes=executeQuery($query);
+				$parte = mysql_fetch_array($resultPartes);
+				if(isset($parte["kmFinal"])&&($partesPorMantenimiento["operacion"]=="Cambio")){
+					$query2 = "CALL buscar_vehiculo(".$parte["idInterno"].");";
+					$resultVehiculos=executeQuery($query2);
+					$resultVehiculos=mysql_fetch_array($resultVehiculos);
+					$query3 = "CALL update_partes(".$parte["idpartes"].",null,".$resultVehiculos["kilometros"].");";				executeQuery($query2);
+					echo $query3;
+					
+				}
+			}
+		
+		}
+	}
+	
+		
+	
+}
+
+
+function getMantenimientoProgramado(){
+	$idVehiculo=$_POST["idVehiculo"];
+	$query = "CALL buscar_mantenimiento(0,".$idVehiculo.",'Programado');";
+	$result = executeQuery($query);
+	$listaTareas=array();
+	$lista="";
+	
+	if(mysql_num_rows($result)>0){
+		while($row = mysql_fetch_array($result)){
+			$listaMantenimientos[]=$row;			
+		}
+		
+		for($i=0;$i<sizeof($listaMantenimientos);$i++){
+			$lista=$lista."<div id=\"".$listaMantenimientos[$i]["idmantenimiento"]."\"<label>ID:".$listaMantenimientos[$i]["idmantenimiento"]."</label> - <label>Titulo:".$listaMantenimientos[$i]['titulo']."</label><button id=\"btn_ejecutar_mp\">Ejecutar</button><button id=\"btn_borrar_mp\">Borrar</button><ul>Tareas:";
+			$query = "CALL listar_partes_por_mantenimiento(".$listaMantenimientos[$i]["idmantenimiento"].");";
+			$result = executeQuery($query);
+			if(mysql_num_rows($result)>0){
+				while($row = mysql_fetch_array($result)){
+					$lista=$lista."<li><label>".$row["nombre"].": ".$row["operacion"]."</li>";			
+				}
+				$lista=$lista."</ul></div>";
+			}
+			
+			
+			
+		}
+		
+		echo $lista;
+	}else{
+		echo json_encode(array("resultado"=>'FALSE'));
+	
+	}
+}
+/*
+
+function getMantenimientoProgramado(){
+	$idVehiculo=$_POST["idVehiculo"];
+	$query = "CALL buscar_mantenimiento(0,".$idVehiculo.",'Programado');";
+	$result = executeQuery($query);
+	$listaTareas=array();
+	echo $query;
+	if(mysql_num_rows($result)>0){
+		while($row = mysql_fetch_array($result)){
+			$listaTareas[]=$row;			
+		}
+		echo json_encode($listaTareas);
+	}else{
+		echo json_encode(array("resultado"=>'FALSE'));
+	
+	}
+}*/
+
 function getMantenimiento(){
 	$idMantenimiento=$_POST["idMantenimiento"];
-	$query = "CALL buscar_mantenimiento('".$idMantenimiento."')";
+	$query = "CALL buscar_mantenimiento('".$idMantenimiento."',null,null)";
 	$result = executeQuery($query);
 	$row = mysql_fetch_array($result);
 	
-	
-	$nombre=$row["nombre"];
+	$proveedor=$row["proveedor"];
 	$fechaInicio=$row["fechaInicio"];
 	$fechaFin=$row["fechaFin"];
 
@@ -1002,7 +1112,7 @@ function getMantenimiento(){
 	$horas=$row["horas"];
 	$descripcion=$row["descripcion"];
 	
-	$mantenimiento=array("proveedor"=>$nombre,"fechaInicio"=>$fechaInicio,"fechaFin"=>$fechaFin,"km"=>$km,"precio"=>$precio,"estado"=>$estado,"titulo"=>$titulo,"horas"=>$horas,"descripcion"=>$descripcion);
+	$mantenimiento=array("proveedor"=>$proveedor,"fechaInicio"=>$fechaInicio,"fechaFin"=>$fechaFin,"km"=>$km,"precio"=>$precio,"estado"=>$estado,"titulo"=>$titulo,"horas"=>$horas,"descripcion"=>$descripcion);
 	
 	echo json_encode($mantenimiento);	
 	
@@ -1010,30 +1120,49 @@ function getMantenimiento(){
 
 function altaMantenimiento(){
 	
-	 
-	  $titulo=$_POST["titulo"];
-	  $proveedor=$_POST["proveedor"];
-	  $km=$_POST["km"];
-	  $fechaInicio1=$_POST["fechaInicio"];
-	  $fechaInicio=date("d/m/Y",strtotime($fechaInicio1));
-	  $fechaFin1=$_POST["fechaFin"];
-	  $fechaFin=date("d/m/Y",strtotime($fechaFin1));
-	  $precio=$_POST["precio"];
-	  $estado=$_POST["estado"];
-	  $vehiculo=$_POST["vehiculo"];
-	  $descripcion=$_POST["descripcion"];
+	$mantenimiento=$_POST['nuevoMantenimiento'];
+	
+	
+	$proveedor=$mantenimiento[0]['proveedor'];
+	$fechaInicio=$mantenimiento[0]['fechaInicio'];
+	$fechaFin=$mantenimiento[0]['fechaFin'];
+	$km=$mantenimiento[0]['km'];
+	$precio=$mantenimiento[0]['precio'];
+	$estado=$mantenimiento[0]['estado'];
+	$titulo=$mantenimiento[0]['titulo'];
+	$descripcion=$mantenimiento[0]['descripcion'];
 	
 	 $query = "CALL alta_mantenimiento('".$proveedor."','".$fechaInicio."','".$fechaFin."','".$km."','".$precio."','".$estado."','".$titulo."','".$descripcion."');";
 	$result = executeQuery($query);
-	 $row = mysql_fetch_array($result);	 
-	 $nuevoId=$row["idMantenimiento"]; 
+	echo $query;
+	if(mysql_num_rows($result)>0){
+		$row = mysql_fetch_array($result);	 
+		$idMantenimiento=$row["idMantenimiento"];
+		echo $idMantenimiento;
 	 
-	
-		
-	echo json_encode(array('id' => $nuevoId)); 
+		if (isset($_POST['partes'])){
+			$partes=$_POST['partes'];
+			for($i=0;$i<sizeof($partes);$i++){
+				$query = "CALL alta_partespormantenimiento(".$idMantenimiento.",'".$partes[$i]['idPartes']."','".$partes[$i]['descripcion']."','".$partes[$i]['observaciones']."','".$partes[$i]['operacion']."');";
+				$result = executeQuery($query);
+				echo $query;	
+				
+				
+			}
+			//HAGO LOS CAMBIOS DE ESTADO EN LOS VEHICULOS	
+				$query="call buscar_parte(".$partes[0]["idPartes"].");";
+				$result = executeQuery($query);
+				$row = mysql_fetch_array($result);
+				if($mantenimiento[0]['estado']=="Programado"||$mantenimiento[0]['estado']=="En curso"){
+					$query="call update_estado_vehiculo('".$row["idInterno"]."','No operativo');";
+					$result = executeQuery($query);		
+					
+				}
+					
+		}
+	}
 	
 
-	  return;
 }
 
 function altaPartesMantenimiento(){

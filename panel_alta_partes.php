@@ -1,4 +1,5 @@
 
+<div id="panel_alta_partes">
 <h2>Descripcion de parte</h2>
 <form id="formAltaPartes" action="" title="" method="post">
 
@@ -16,99 +17,157 @@
 <li><label>Nombre:</label>
 <input id="nombreParte" type="text" /></li>
 <li><label>Descripcion:</label></li>
-<li><textarea id="descripcionParte" cols="40" rows="5"></textarea>
+<li><textarea id="descripcionParte" cols="40" rows="5"></textarea></li>
 
-<li> <button id="submitParte" type="submit">Agregar</button> 
-</form></li>
+<li> <button id="btnSubmitParte" type="submit">Agregar</button></li>
+</form>
+</div>
 
 <div id="prueba">
 </div>
 <script>
-var tipoParte=$("#tipoParte").val();
+
+
+var tipoParte="";
+var idParte="";
 
 $(document).ready(function(e) {
-    if($estadoModal=="mostrar"){
-		$('#submitParte').css('display','none');	
+	if(sessionStorage.getItem("idParte")!=null){
+		sendAjaxJson({tarea:'getPartes','idparte':sessionStorage.getItem("idParte")},function(data){
+			idParte=sessionStorage.getItem("idParte");
+			sessionStorage.removeItem("idParte");
+			tipoParte=data.tipo;
+			agregarCampo();
+			$("#nombreParte").val(data.nombre);
+			$("#tipoParte").val(data.tipo);
+			$("#descripcionParte").val(data.descripcion);
+			$("#especificacionesParte").val(data.especificaciones);
+			$("#fechaFin").val(data.fechaVencimiento);
+			$("#kmColocacion").val(data.kmInicial);
+			$("#kmVencimiento").val(data.kmFinal);
+			
+		});
 	}else{
-		$('#submitParte').css('display','block');
+		tipoParte=$("#tipoParte").val();
 	}
-});
-
-$("#formAltaPartes").on("submit",this,function(e){
-	e.preventDefault();
-	if(tipoParte=='Accesorios'){
-		var nombre=$("#nombreParte").val();
-		var descripcion=$("#descripcionParte").val();
-		var datos={tarea:'altaPartesVehiculo',padre:null,vehiculo:$vehiculoActual,nombre:nombre,tipo:tipoParte,kmInicial:null,kmFinal:null,fechaInicio:null,fechaFin:null,descripcion:descripcion,especificaciones:null};
-		sendAjaxHtml(datos,function(datos){
-			cerrarModalPartes()
-		});
-	}else if(tipoParte=='Documentacion'){
-		var nombre=$("#nombreParte").val();
-		var fechaFin=$("#fechaFin").val();
-		var descripcion=$("#descripcionParte").val();
-		var datos={tarea:'altaPartesVehiculo',padre:null,vehiculo:$vehiculoActual,nombre:nombre,tipo:tipoParte,kmInicial:null,kmFinal:null,fechaInicio:null,fechaFin:fechaFin,descripcion:descripcion,especificaciones:null};
-		sendAjaxHtml(datos,function(datos){
-			cerrarModalPartes()
-		});
-	}else if(tipoParte=='Componentes'){
-		var nombre=$("#nombreParte").val();
-		var descripcion=$("#descripcionParte").val();
-		var datos={tarea:'altaPartesVehiculo',padre:null,vehiculo:$vehiculoActual,nombre:nombre,tipo:tipoParte,kmInicial:null,kmFinal:null,fechaInicio:null,fechaFin:null,descripcion:descripcion,especificaciones:null};
-		sendAjaxHtml(datos,function(datos){
-			cerrarModalPartes()
-		});
-	}else if(tipoParte=='Lubricantes'){
-		var nombre=$("#nombreParte").val();
-		var descripcion=$("#descripcionParte").val();
-		var especificaciones=$('#especificacionesParte').val();
-		var kmColocacion=$('#kmColocacion').val();
-		var kmVencimiento=$('#kmVencimiento').val();
-		alert(kmVencimiento);
-		var datos={tarea:'altaPartesVehiculo',padre:null,vehiculo:$vehiculoActual,nombre:nombre,tipo:tipoParte,kmInicial:kmColocacion,kmFinal:kmVencimiento,fechaInicio:null,fechaFin:fechaFin,descripcion:descripcion,especificaciones:especificaciones};
-		sendAjaxHtml(datos,function(datos){
-			cerrarModalPartes()
-		});
-	}else if(tipoParte=='Filtros'){
-		var nombre=$("#nombreParte").val();
-		var descripcion=$("#descripcionParte").val();
-		var especificaciones=$('#especificacionesParte').val();
-		var kmColocacion=$('#kmColocacion').val();
-		var kmVencimiento=$('#kmVencimiento').val();
-		var datos={tarea:'altaPartesVehiculo',padre:null,vehiculo:$vehiculoActual,nombre:nombre,tipo:tipoParte,kmInicial:kmColocacion,kmFinal:kmVencimiento,fechaInicio:null,fechaFin:fechaFin,descripcion:descripcion,especificaciones:especificaciones};
-		sendAjaxHtml(datos,function(datos){
-			cerrarModalPartes()
-		});
-	}else if(tipoParte=='Seguridad'){
-		var nombre=$("#nombreParte").val();
-		var fechaFin=$("#fechaFin").val();
-		var descripcion=$("#descripcionParte").val();
-		var datos={tarea:'altaPartesVehiculo',padre:null,vehiculo:$vehiculoActual,nombre:nombre,tipo:tipoParte,kmInicial:null,kmFinal:null,fechaInicio:null,fechaFin:fechaFin,descripcion:descripcion,especificaciones:null};
-		sendAjaxHtml(datos,function(datos){
-			cerrarModalPartes()
-		});
+    if(sessionStorage.getItem("operacion")=="mostrar"){
+		$('#btnSubmitParte').css('display','none');
+		$("#tipoParte").prop("disabled", true);
+	}else if(sessionStorage.getItem("operacion")=="nuevo"){
+		alert("nuevo");
+		$('#btnSubmitParte').css('display','block');
+	}else if(sessionStorage.getItem("operacion")=="actualizarParte"){
+		$('#btnSubmitParte').css('display','block');
+	}else if(sessionStorage.getItem("operacion")=="modificar"){
+		$('#btnSubmitParte').css('display','block');
+		$("#btnSubmitParte").text("Modificar");
+		$("#tipoParte").prop("disabled", true);
 	}
 	
 	
-});
-
-$("#tipoParte").on("change",function()
-{
+	
+	$("#tipoParte").on("change",function(){
+	tipoParte=$("#tipoParte").val();
 	$("#formAltaPartes input").each(function(index, element) {
         $(this).val("");
+		;	
     });
 	
 	$("#formAltaPartes textarea").each(function(index, element) {
         $(this).val("");
     });
+	agregarCampo();
+	
+});
 	agregarCampo();	
 });
 
+$("#formAltaPartes").on("submit",this,function(e){
+	e.preventDefault();
+	if(sessionStorage.getItem("operacion")=="nuevo"){
+		if(tipoParte=='Accesorios'){
+			var nombre=$("#nombreParte").val();
+			var descripcion=$("#descripcionParte").val();
+			var datos={tarea:'altaPartesVehiculo',padre:null,vehiculo:$vehiculoActual,nombre:nombre,tipo:tipoParte,kmInicial:null,kmFinal:null,fechaInicio:null,fechaFin:null,descripcion:descripcion,especificaciones:null};
+			sendAjaxHtml(datos,function(datos){
+				cerrarModalPartes();
+			});
+		}else if(tipoParte=='Documentacion'){
+			var nombre=$("#nombreParte").val();
+			var fechaFin=$("#fechaFin").val();
+			var descripcion=$("#descripcionParte").val();
+			var datos={tarea:'altaPartesVehiculo',padre:null,vehiculo:$vehiculoActual,nombre:nombre,tipo:tipoParte,kmInicial:null,kmFinal:null,fechaInicio:null,fechaFin:fechaFin,descripcion:descripcion,especificaciones:null};
+			sendAjaxHtml(datos,function(datos){
+				cerrarModalPartes();
+			});
+		}else if(tipoParte=='Componentes'){
+			var nombre=$("#nombreParte").val();
+			var descripcion=$("#descripcionParte").val();
+			var datos={tarea:'altaPartesVehiculo',padre:null,vehiculo:$vehiculoActual,nombre:nombre,tipo:tipoParte,kmInicial:null,kmFinal:null,fechaInicio:null,fechaFin:null,descripcion:descripcion,especificaciones:null};
+			sendAjaxHtml(datos,function(datos){
+				cerrarModalPartes();
+			});
+		}else if(tipoParte=='Lubricantes'){
+			var nombre=$("#nombreParte").val();
+			var descripcion=$("#descripcionParte").val();
+			var especificaciones=$('#especificacionesParte').val();
+			var kmColocacion=$('#kmColocacion').val();
+			var kmVencimiento=$('#kmVencimiento').val();
+			var datos={tarea:'altaPartesVehiculo',padre:null,vehiculo:$vehiculoActual,nombre:nombre,tipo:tipoParte,kmInicial:kmColocacion,kmFinal:kmVencimiento,fechaInicio:null,fechaFin:fechaFin,descripcion:descripcion,especificaciones:especificaciones};
+			sendAjaxHtml(datos,function(datos){
+				cerrarModalPartes();
+			});
+		}else if(tipoParte=='Filtros'){
+			var nombre=$("#nombreParte").val();
+			var descripcion=$("#descripcionParte").val();
+			var especificaciones=$('#especificacionesParte').val();
+			var kmColocacion=$('#kmColocacion').val();
+			var kmVencimiento=$('#kmVencimiento').val();
+			var datos={tarea:'altaPartesVehiculo',padre:null,vehiculo:$vehiculoActual,nombre:nombre,tipo:tipoParte,kmInicial:kmColocacion,kmFinal:kmVencimiento,fechaInicio:null,fechaFin:fechaFin,descripcion:descripcion,especificaciones:especificaciones};
+			sendAjaxHtml(datos,function(datos){
+				cerrarModalPartes();
+			});
+		}else if(tipoParte=='Seguridad'){
+			var nombre=$("#nombreParte").val();
+			var fechaFin=$("#fechaFin").val();
+			var descripcion=$("#descripcionParte").val();
+			var datos={tarea:'altaPartesVehiculo',padre:null,vehiculo:$vehiculoActual,nombre:nombre,tipo:tipoParte,kmInicial:null,kmFinal:null,fechaInicio:null,fechaFin:fechaFin,descripcion:descripcion,especificaciones:null};
+			sendAjaxHtml(datos,function(datos){
+				cerrarModalPartes();
+			});
+		}else if(tipoParte=='Cubiertas'){
+			var nombre=$("#nombreParte").val();
+			var descripcion=$("#descripcionParte").val();
+			var especificaciones=$('#especificacionesParte').val();
+			var kmColocacion=$('#kmColocacion').val();
+			var kmVencimiento=$('#kmVencimiento').val();
+			var datos={tarea:'altaPartesVehiculo',padre:null,vehiculo:$vehiculoActual,nombre:nombre,tipo:tipoParte,kmInicial:kmColocacion,kmFinal:kmVencimiento,fechaInicio:null,fechaFin:fechaFin,descripcion:descripcion,especificaciones:especificaciones};
+			sendAjaxHtml(datos,function(datos){
+				cerrarModalPartes();
+			});
+		}
+	}else if(sessionStorage.getItem("operacion")=="modificar"){
+			var nombre=$("#nombreParte").val();
+			var descripcion=$("#descripcionParte").val();
+			var especificaciones=$('#especificacionesParte').val();
+			var kmColocacion=$('#kmColocacion').val();
+			var fechaFin=$("#fechaFin").val();
+			var kmVencimiento=$('#kmVencimiento').val();
+			var datos={tarea:'modificarPartesVehiculo',idParte:idParte,nombre:nombre,kmInicial:kmColocacion,kmFinal:kmVencimiento,fechaInicio:null,fechaFin:fechaFin,descripcion:descripcion,especificaciones:especificaciones};
+			sendAjaxHtml(datos,function(datos){
+				cerrarModalPartes();
+			});
+	}
+	
+	
+});
+
+
+
+
 function agregarCampo(){
-	tipoParte=$("#tipoParte").val();
+	
 	var nuevoCampo="";
-	
-	
 	
 	if(tipoParte=='Filtros'){
 		nuevoCampo+="<li><label class=\"agregado\" >Colocacion (Km):</label>";
@@ -192,11 +251,6 @@ $('#fechaFin').val(today);
 }
 
 
-
-$(window).on("load",this,function(){
-	agregarCampo();
-	
-});
 
 
 

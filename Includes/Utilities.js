@@ -48,7 +48,6 @@ function sendAjaxJson(datos,callBack){
 
 function loadTableFromDb(table,task,attr1,attr2,attr3){
 	$(document).ready(function(e) {    
-    
 	$.ajax({
 	url: 'Includes/FuncionesDB.php',
 	type: 'POST',
@@ -61,7 +60,6 @@ function loadTableFromDb(table,task,attr1,attr2,attr3){
 				$(this).remove();
 			}
         });
-		var tabla=table+" tr:last";
 		$(table + " > tbody:last").append(response);
 	},
 	error: function(){
@@ -131,9 +129,6 @@ function loadComboFromDBWithType(idComboBox,task,type,callBackFunction){
 }
 
 
-function loadParts(tabla,id){
-	
-}
 
 function addRowAtTableOnClick(div,table,btnId){
 $(div).on("click", btnId, function(){

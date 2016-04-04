@@ -1,11 +1,12 @@
+
 <?php
-if (session_status()!=PHP_SESSION_ACTIVE) { session_start(); }
+/*if (session_status()!=PHP_SESSION_ACTIVE) { session_start(); }
 if((session_status()!=PHP_SESSION_ACTIVE)||(empty($_SESSION['user_name'])))
 {
 header('Location: login.php');
 }else{
 	print_r($_SESSION);
-}
+}*/
 
 ?>
 
@@ -55,7 +56,7 @@ header('Location: login.php');
 </table>
 
 
-<button id="botonDetalles"> Ver detalles </button>
+<button id="btnDetalles" style="display:none"> Ver detalles </button>
 
 <div  id="detalleVehiculos" style="display:none">
 <h2>Detalles del vehiculo</h2>
@@ -125,11 +126,8 @@ header('Location: login.php');
 <select id="comboBoxFiltroPartes"> </select>
 
 </div>
-<table id="tablaVehiculosPartes"><thead><tr>
-<th>ID</th><th>Nombre</th><th>Colocacion(Km)</th><th>Vencimiento(Km)</th><th>Colocacion(Fecha)</th><th>Vencimiento(Fecha)</th><th>Descripcion</th><th>Especificaciones</th></tr></thead><tbody class="scrollContent"></tbody>
-
-
-</table>
+<table id="tablaVehiculosPartes"><thead>
+<th>ID</th><th>Nombre</th><th>Colocacion(Km)</th><th>Vencimiento(Km)</th><th>Vencimiento(Fecha)</th></thead><tbody class="scrollContent"></tbody></table>
 </div>
 </div>
 
@@ -177,7 +175,7 @@ $("#logout").on("click",this,function(){
 	$(location).attr('href','index.php');
 	
 });
-
+/*
 $(document).ready(function(e) {
     var user=window.sessionStorage.getItem('user_name');
 	var perfil=window.sessionStorage.getItem(user);
@@ -188,7 +186,7 @@ $(document).ready(function(e) {
 		alert("No podes entrar aca viejo");
 		window.history.back();
 	}
-});
+});*/
 
 $("#comboBoxFiltro").on("input",function(){	
 	
@@ -226,7 +224,7 @@ $("#tablaVehiculos").on("click",'tr',function() {
     $(this).addClass("seleccionFila");
 });*/
 
-$("#botonDetalles").on("click",this,function(){
+$("#btnDetalles").on("click",this,function(){
 	
 	 mostrarDetalles();
 	 
@@ -236,7 +234,7 @@ $("#botonDetalles").on("click",this,function(){
 function mostrarDetalles(){
 	
 	if($estadoDetalle==0){
-		$("#botonDetalles").text("Ocultar detalle");
+		$("#btnDetalles").text("Ocultar detalle");
 		$("#detalleVehiculos").toggle("slow");
 		$('html,body').animate({
         scrollTop: $("#formVehiculo").offset().top
@@ -244,7 +242,7 @@ function mostrarDetalles(){
 		mostrarVehiculo();
 		$estadoDetalle=1;
 	}else{
-		$("#botonDetalles").text("Ver detalle");
+		$("#btnDetalles").text("Ver detalle");
 		$('html,body').animate({
         scrollTop: $("#formVehiculo").offset().top
     }, 2000);
@@ -257,6 +255,7 @@ function mostrarDetalles(){
 $('#tablaVehiculos').not("first").on( 'click', 'td', function (e) {
 	var $row = jQuery(this).closest('tr');
     var $columns = $row.find('td');
+	$("#btnDetalles").css("display","block");
 	jQuery.each($columns, function(i, item) {
 			if(i==0){
 				$vehiculoActual=item.innerHTML;
@@ -293,9 +292,11 @@ $('#tablaVehiculosPartes').not("first").on( 'click', 'td', function (e) {
 				$vehiculoPartes=item.innerHTML;
 			}
 	});
+	window.sessionStorage.idParte=$vehiculoPartes;
+	sessionStorage.operacion="mostrar";
 	
 	$('tr.seleccionFila:first').removeClass("seleccionFila");
-   				$(this).closest("tr").addClass("seleccionFila");
+   	$(this).closest("tr").addClass("seleccionFila");
 	
 	
 });
@@ -376,13 +377,14 @@ function modificarVehiculo(){
 }
 
 function nuevoVehiculo(){
-	
+	$("#partes").css("display","none");
 	if($("#detalleVehiculos").is(':visible')){
 		cleanForm("#formVehiculo");	
 	}else{
 		//mostrarDetalles();
 		$("#detalleVehiculos").css({'display':'block'});
-		$("#botonDetalles").css({'display':'none'});
+		$("#btnDetalles").css({'display':'none'});
+		
 	}
 	sendAjaxHtml({tarea:'getProximoVehiculo',tipo:'Camioneta'},function(response){
 		$("#numero").val(response);
@@ -497,6 +499,7 @@ function nuevoVehiculo(){
 						 	  altaPartesVehiculos();
                               break;
 						case "modificar":
+								modificarPartesVehiculo();
 							
                               
                               break;
@@ -552,7 +555,7 @@ function borrarParte(){
 	
 	if($vehiculoPartes!=0){
 		$estado="borrar";
-		if (confirm('¿Esta seguro que desea eliminar el vehiculo seleccionado?')){
+		if (confirm('¿Esta seguro que desea eliminar el componente seleccionado?')){
 			sendAjaxHtml({tarea:'borrarParte',idPartes:$vehiculoPartes},function(datos){
 					alert(datos);
 					loadTableFromDb("#tablaVehiculosPartes","cargarTablaVehiculosPartes",$tipoPartes,$vehiculoActual);
@@ -561,16 +564,17 @@ function borrarParte(){
 		}
 		
 	}else{
-		alert("Por favor seleccione un vehiculo para borrar");
+		alert("Por favor seleccione un componente a borrar");
 	}
 	
 	
 }
 
-function mostrarModalPartes(){
+function mostrarModalPartes(titulo){
 	$('#partesVehiculos_Modal').load('panel_alta_partes.php');
 		 $('#partesVehiculos_Modal').dialog({
 			 resizable: false,
+			 title: titulo,
 			  height:500,
 			  width:900,
 			  modal: true,
@@ -584,17 +588,27 @@ function mostrarModalPartes(){
 }
 
 function altaPartesVehiculos(){
-	$estadoModal='alta';
-	mostrarModalPartes();	
+	sessionStorage.operacion='nuevo';
+	sessionStorage.removeItem("idParte");
+	mostrarModalPartes("Nuevo componente");	
 }
 
+function modificarPartesVehiculo(){
+	sessionStorage.operacion='modificar';
+	var valorTipo=$("#comboBoxFiltroPartes").val();
+	mostrarModalPartes("Modificar "+valorTipo);
+	
+}
 function mostrarPartesVehiculos(){
 	$estadoModal='mostrar';
 	mostrarModalPartes();
+	var valorTipo=$("#comboBoxFiltroPartes").val();
+	mostrarModalPartes("Detalles "+valorTipo);
 	
 }
 
 $('#tablaVehiculosPartes tbody').on("dblclick",this,function(){
+	sessionStorage.operacion='mostrar';
 	 mostrarPartesVehiculos();
 });
 

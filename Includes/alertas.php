@@ -1,5 +1,6 @@
 <?php
 	require('mailSender.php');
+	require('db.php');
 	
 
 	$listaplanes=array();
@@ -7,6 +8,7 @@
 	global $alertas;
 	$listaPartesMail=array();
 	$listaTareasMail=array();
+	$listaMantenimientoProgramadoMail=array();
 	alertas_mantenimientosProgramados();
 
 function alertas_mantenimientosProgramados(){
@@ -20,13 +22,36 @@ function alertas_mantenimientosProgramados(){
 	  }
 	  for($i=0;$i<sizeof($listaMantenimientos);$i++){
 		  $mantenimiento=$listaMantenimientos[$i];
+		  //BUSCA LOS MANTENIMIENTOS PROGRAMADOS
 		  if($mantenimiento["estado"]=="Programado"){
 			$fechaInicio =DateTime::createFromFormat('Y-m-d', $mantenimiento["fechaInicio"]); 
         	$fechaActual = new DateTime('now');
             $interval = $fechaInicio->diff($fechaActual);
             $diffDias=$interval->format('%a');
 			echo $diffDias;
-			
+			//SI FALTA 1 DIA PARA EL MANTENIMIENTO LO AVISA
+			if($diffDias==0||$diffDias==1){
+				//BUSCA LAS PARTES POR MANTENIMIENTO
+				$query = "call buscar_partespormantenimiento(".$mantenimiento["idmantenimiento"].");";
+				$result = executeQuery($query);
+				if(mysql_num_rows($result)>=1){
+					while($row = mysql_fetch_array($result))
+					{
+						$listaMantenimientoProgramadoMail[]=$row;
+						echo "entro";
+						echo $row['partes_idpartes'];
+						$query = "call buscar_parte(".$row['partes_idpartes'].");";
+						$result = executeQuery($query);
+						while($row = mysql_fetch_array($result)){
+							echo $row['nombre'];
+							
+						}
+						
+			  
+					}
+				}
+				
+			}
             
 		  }
 	  }
@@ -200,6 +225,7 @@ function enviarAlertas($vehiculo){
 	$listaMail=array();
 	global $listaPartesMail;
 	global $listaTareasMail;
+	global $listaMantenimientoProgramadoMail;
 	$tablaPartes="";
 	$tablaTareas="";
 	$head="<h3>Datos del vehiculo</h3>"."<p>Identificacion: <b>".$vehiculo["idInterno"]."</b></p>"."<p>Marca y modelo: <b>".$vehiculo["marca"]." - ".$vehiculo["modelo"]."</b></p>";
@@ -233,27 +259,6 @@ function enviarAlertas($vehiculo){
 }
 
 
-
-function executeQuery($query){
-
-	$host = "Gabriel";//gethostbyaddr($_SERVER['SERVER_ADDR']);	
-	$str_datos = file_get_contents("datos.json",FILE_USE_INCLUDE_PATH);
-	$datos = json_decode($str_datos,true);
-	$dbPass=$datos[$host]["Pass"];
-	$user=$datos[$host]["User"];
-	$dbname="control_vehiculos";
-	
-	$link = @mysql_connect("localhost",$user,$dbPass)
-		  or die ("Error al conectar a la base de datos.");
-	  @mysql_select_db($dbname, $link)
-		  or die ("Error al conectar a la base de datos");
-	
-	  $result = mysql_query($query);
-	  mysql_close($link);
-	  return $result;
-	
-}
-	
 
 
 ?>
