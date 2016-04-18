@@ -79,22 +79,21 @@ Vehiculo:
 <div id="detalleMantenimiento" style="display:none">
 
 
-<h2>Partes del vehiculo</h2>
-
 <h2>Componentes</h2>
 <div id="filtros">Filtrar por:
 <select id="comboBoxFiltroPartes"> </select>
 </div> 
 
-<table id="tablaPartes"><thead>
-<th>ID</th><th>Nombre</th><th>Colocacion(Km)</th><th>Vencimiento(Km)</th><th>Vencimiento(Fecha)</th></thead><tbody></tbody></table>
+<table id="tablaPartes"><thead><tr>
+<th>ID</th><th>Nombre</th><th>Colocacion(Km)</th><th>Vencimiento(Km)</th><th>Vencimiento(Fecha)</th></tr>
+</thead><tbody></tbody></table>
 
 
 
 <div id="tablaPartesMantenimientos">
 <h2>Partes incluidas en el mantenimiento</h2>
-<table id="tablaPartesMantenimientos"><thead>
-<th>ID</th><th>Nombre</th><th>Operacion</th><th>Detalles y Observaciones</th></thead>
+<table id="tablaPartesMantenimientos"><thead><tr>
+<th>ID</th><th>Nombre</th><th>Operacion</th><th>Detalles y Observaciones</th></tr></thead>
 <tbody>
 
 </tbody>
@@ -131,6 +130,22 @@ var parteActual;
 
 		
 $(document).ready(function(e) {
+	
+	
+$(document).ready(function(e) {
+    var user=window.sessionStorage.getItem('user_name');
+	var perfil=window.sessionStorage.getItem(user);
+	//COMPARA CON EL ID DE LA VENTANA...SI ES CORRECTO LO DEJA ENTRAR
+	var permiso=perfil&8;
+	if(permiso==0){
+		window.stop();
+		alert("No tiene permisos para acceder a esta funcion");
+		window.history.back();
+	}
+});
+	
+	
+
 //FILTRO
 loadComboFromDB("#comboBoxProveedores","cargarComboBoxProveedores");
 loadComboFromDB("#comboBoxFiltro","cargarComboBoxTipos",function(){
@@ -229,16 +244,12 @@ $("#btnSubmitMantenimiento").css("display","none");
 });
 
  function altaProveedor(){
-	var $proveedor=$(this).val();
+	var $proveedor=$("#proveedores").val();
 	if($proveedor!=""){
-		$.ajax({
-		url: 'Includes/FuncionesDB.php',
-		type: 'POST',
-		async:true,
-		dataType:'html',
-		data: {tarea:"altaProveedorSimple",nombre:$proveedor}
-		});
+		sendAjaxHtml({tarea:"altaProveedorSimple",nombre:$proveedor},function(data){
+			$("#prueba").append(data);});
 	}
+	return;
  }
  
 
@@ -388,12 +399,11 @@ $("#btnCommit").on("click",this,function(){
 			mantenimiento.partes.push({idPartes:id,operacion:operacion,descripcion:null,observaciones:null});
 		}
 	});
-	$("#prueba").empty();
-	$("#prueba").append(JSON.stringify(mantenimiento));
+	altaProveedor();
 	sendAjaxHtml(mantenimiento,function(data){
 		$("#prueba").append(data);
 	});
-	altaProveedor();
+	
 	//$(location).attr('href','alta_mantenimiento.php');
 		
     });

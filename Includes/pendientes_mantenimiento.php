@@ -8,7 +8,7 @@
 	$listaTareas=array();
 	$result = executeQuery($query);	
 	$i=0;
-	while($row = mysql_fetch_array($result))
+	while($row = $result->fetch_assoc())
 	  {
 		   $listaplanes[$i]=$row;
 		   $i++;
@@ -22,16 +22,16 @@
 			//POR CADA PLAN DE MANTENIMIENTO BUSCA LAS ALERTAS CORRESPONDIENTES
 			$query = "call buscar_alertas(".$listaplanes[$i]['idplanMantenimiento'].");";
 			$result = executeQuery($query);
-			if(mysql_num_rows($result) != 0){
-				$alertas= mysql_fetch_array($result);
+			if($result){
+				$alertas= $result->fetch_assoc();
 			}
 			// POR CADA PLAN DE MANTENIMIENTO BUSCA LOS VEHICULOS INCLUIDOS EN CADA PLAN
 			$query = "call listar_vehiculos_por_plan(".$listaplanes[$i]['idplanMantenimiento'].");";
 			$result = executeQuery($query);			
 				
-			if(mysql_num_rows($result) != 0){
+			if($result){
 				$j=0;
-				while($row = mysql_fetch_array($result))
+				while($row = $result->fetch_assoc())
 				  {
 					 $vehiculos_por_plan[$j]=$row;
 					 $j++;  
@@ -59,9 +59,9 @@ function comprobarPartesVehiculos($vehiculoIncluido,$alertas){
         $query = "call listar_partes('".$vehiculoIncluido["idInterno"]."',0,null);";
         $result = executeQuery($query);
 		$kmAntes=$alertas["kmAntes"];
-        if(mysql_num_rows($result) != 0){
+        if($result){
         	$i=0;
-            while($row = mysql_fetch_array($result))
+            while($row = $result->fetch_assoc())
           	{	
             	$partes[$i]=$row;
                	$i++;
@@ -95,7 +95,7 @@ function comprobarPartesVehiculos($vehiculoIncluido,$alertas){
 					  
                         $query = "call buscar_vehiculo('".$vehiculoIncluido["idInterno"]."');";
                         $result = executeQuery($query);
-						$vehiculo=mysql_fetch_array($result);
+						$vehiculo=$result->fetch_assoc();
 						$kmActual=$vehiculo['kilometros'];
 						$diffKm=$kmActual-$partes[$i]['kmFinal'];
 						
@@ -114,8 +114,8 @@ function comprobarTareas($vehiculo,$plan,$alertas){
 	// CARGA LAS TAREAS POR PLAN DE MANTENIMIENTO 
 	$query = "call listar_tareas_por_planmantenimiento(".$plan["idplanMantenimiento"].");";
   	$result = executeQuery($query);
-    if(mysql_num_rows($result) != 0){
-	    while($row = mysql_fetch_array($result))
+    if($result){
+	    while($row = $result->fetch_assoc())
       	{	
         	$tareas[]=$row;
 		}

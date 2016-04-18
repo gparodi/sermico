@@ -41,10 +41,9 @@ a:hover, a:active, a:focus { /* este grupo de selectores proporcionará a un usu
 	width: 100%;
 	max-width: 1260px;/* puede que sea conveniente una anchura máxima (max-width) para evitar que este diseño sea demasiado ancho en un monitor grande. Esto mantiene una longitud de línea más legible. IE6 no respeta esta declaración. */
 	min-width: 780px;/* puede que sea conveniente una anchura mínima (min-width) para evitar que este diseño sea demasiado estrecho. Esto permite que la longitud de línea sea más legible en las columnas laterales. IE6 no respeta esta declaración. */
-	background-color: #FFFFFF;
+	background-color: #FFF;
 	margin: 0 auto; /* el valor automático de los lados, unido a la anchura, centra el diseño. No es necesario si establece la anchura de .container en el 100%. */
 }
-
 
 /* ~~ no se asigna una anchura al encabezado. Se extenderá por toda la anchura del diseño. Contiene un marcador de posición de imagen que debe sustituirse por su propio logotipo vinculado ~~ */
 .header {
@@ -96,6 +95,14 @@ ul.nav a:hover, ul.nav a:active, ul.nav a:focus { /* esto cambia el color de fon
 	color: #FFF;
 }
 
+/* ~~ El pie de página ~~ */
+.footer {
+	padding: 10px 0;
+	background-color: #6F7D94;
+	position: relative;/* esto da a IE6 hasLayout para borrar correctamente */
+	clear: both; /* esta propiedad de borrado fuerza a .container a conocer dónde terminan las columnas y a contenerlas */
+}
+
 /* ~~ clases float/clear varias ~~ */
 .fltrt {  /* esta clase puede utilizarse para que un elemento flote en la parte derecha de la página. El elemento flotante debe preceder al elemento junto al que debe aparecer en la página. */
 	float: right;
@@ -111,68 +118,90 @@ ul.nav a:hover, ul.nav a:active, ul.nav a:focus { /* esto cambia el color de fon
 	font-size: 1px;
 	line-height: 0px;
 }
-
 /*-----------LOG IN***************/
 
 #divUsuario{
-	float: right;
-	font-family:"Arial Black", Gadget, sans-serif;
-	padding-top:10px;
-	padding-bottom:15px;
-	overflow: hidden;
-	display:inline-block;
-		
-}
-#divUsuario input{
-	border-radius:5px;
-	padding-left:5px;
-	padding-right:5px;	
-}
-#divDescripcionUsuario{
 	
-	overflow: hidden;
+	
 }
-
-#idUsuario, #btnLogOut{
-	display:inline;
-}
-
-
-
-/**-----------FIN LOG IN*********/
 
 /*--------------TABLAS-----------*/
 
+table{
+    width:100%;
+	border-spacing: 0; 
+    display: block; 
+	table-layout: auto;
+	padding:20px;
+}
+table th{
+	word-wrap: break-word;
+	font-family:Arial, Helvetica, sans-serif;
+    height: 3.5vh !important;
+	border-right: 1px solid #c4c0c9;
+	background: #b9c9fe;
+    border-top: 4px solid #aabcfe;    
+	border-bottom: 1px solid #fff; 
+	color: #039;
+	padding:10px;	
+	
+}
+thead,tbody{
+	display:table-header-group;
+}
+tbody{
+	
+	overflow-y:auto;
+}
+table td{
+    white-space: nowrap;
+	text-align:center;
+	padding: 8px;     
+	background: #e8edff;     
+	border-bottom: 1px solid #fff;
+    color: #669;    
+	border-top: 1px solid transparent;
+	text-align:left;
+}
+tbody tr:hover:not(.seleccionFila)  td {
+	background: #d0dafd;
+	color: #339;
+	cursor: pointer;
+	-webkit-transform: scale(1.03);
+    transform: scale(1.03);
+ } 
+*:focus {outline: none;}
 
-td {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  width:20px;
-}
- th {
-  background: darkblue;
-  color: white;
-  width:20px;
-}
-td,th {
-  text-align: left;
-  padding: 5px 10px;
-}
- tr:nth-child(even) {
-  background: #A0C6FE;
-}
+/*------------FIN TABLAS */
+#filtros{
 
-tr:nth-child(odd) {
-  background: #C4E4FF;
+   	padding: 10px;
+   	font-size: 16px;
+	width:100%;
+   	border: 0;
+   	border-radius: 3px;
+   -webkit-appearance: none;
+   -webkit-transition: all 0.4s;
+   -moz-transition: all 0.4s;
+   transition: all 0.4s;
+   -webkit-box-shadow: 0 1px 2px rgba(0,0,0,0.3);	
 }
-
-.seleccionFila td{
- 	background-color:#FF0000;	
+#filtros:hover{
+	background-color: #ddd;
+}
+form{
+	list-style:none;		
 	
 }
 
-/*--------------- MODAL ----------------*/
+.inputText{
+	width:400px;
+	height:100px;
+}	
+
+
+
+//-- MODAL --//
 
 
 .menuPopUp ul{
@@ -194,7 +223,6 @@ tr:nth-child(odd) {
 }
  
 .menuPopUp {
-	font-family:"Arial Black", Gadget, sans-serif;
 	width: 250px;
 	position: absolute;
 	border: 1px solid black;
@@ -205,7 +233,34 @@ tr:nth-child(odd) {
 	z-index: 1000;
 }
 
-/*-------Animacion de espera-----------*/
+.seleccionFila td{
+ 	background-color:#FF0000;	
+	
+}
+button {
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    padding: 10px 27px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+}
+
+
+
+.editableTable { border:solid 1px; width:100% } 
+.editableTable td { border:solid 1px; } 
+.editableTable .cellEditing { padding: 0; } 
+.editableTable .cellEditing input[type=text]{ 
+width:100%; border:0; background-color:rgb(255,253,210); }
+
+
+
+/* Animacion de espera*/
 .modalWait {
     display:    none;
     position:   fixed;
@@ -231,103 +286,3 @@ body.loading {
 body.loading .modalWait {
     display: block;
 }
-
-/*---------FORMULARIOS--------------*/
-
-form{
-	list-style:none;
-	font-family:"Arial Black", Gadget, sans-serif;		
-	
-}
-
-.dataform select {
-    width: 30%;
-    padding: 12px 20px;
-    margin: 8px 0;
-    display: inline-block;
-    border: 2px solid #000;
-    border-radius: 4px;
-    box-sizing: border-box;
-}
-
-.dataform  input[type=text] {
-    width: 30%;
-    padding: 12px 20px;
-    margin: 8px 0;
-    display: inline-block;
-    border: 1px solid #666;
-    border-radius: 4px;
-    box-sizing: border-box;
-}
-
-.dataform textarea {
-    width: 30%;
-    padding: 12px 20px;
-    margin: 8px 0;
-    display: inline-block;
-    border: 1px solid #666;
-    border-radius: 4px;
-    box-sizing: border-box;
-}
-
-.dataform button[type=submit] {
-    width: 20%;
-    background-color: #4CAF50;
-    color: white;
-    padding: 14px 20px;
-    margin: 8px 0;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-input[type=submit]:hover {
-    background-color: #45a049;
-}
-
-
-/*------------BOTONES-----------*/
-
-button {
-    background-color: #0E03D3;
-    border: none;
-    color: white;
-    padding: 10px 27px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 16px;
-    margin: 10px 2px 0px 10px;
-    cursor: pointer;
-}
-
-
-/*------------TITULOS----------*/
-h1{
-	font-family:"Arial Black", Gadget, sans-serif;
-	font-size:28px;
-	text-decoration:underline;
-	color:#333333;
-	text-align:center;	
-	
-}
-
-h2{
-	font-family:"Arial Black", Gadget, sans-serif;
-	font-size:20px;
-	text-decoration:underline;
-	color:#333333;
-	text-align:left;	
-	
-}
-
-/*------FILTRO-------*/
-
-#filtros{
-	font-family:"Arial Black", Gadget, sans-serif;
-	margin:10px 10px 10px 10px;
-	padding:10px 10px 10px 10px;
-	
-}
-
-

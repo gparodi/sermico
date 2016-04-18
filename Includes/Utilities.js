@@ -1,15 +1,5 @@
 // JavaScript Document
-function getDbId(div,tabla){
-$(document).ready(function() {
 
-		$(div).on("click",tabla,function() {
-			var celda = $('td:first', $(this).parents('tr')).text();
-			alert(celda);
-		});
-	
-	});
-
-}
 
 function sendAjaxHtml(datos,callBack){
 	var respuesta="";
@@ -24,7 +14,6 @@ function sendAjaxHtml(datos,callBack){
 		
 	},
 	error: function(jqXHR, textStatus, errorThrown){
-	alert(textStatus);
 	}
 	});
 }
@@ -40,14 +29,12 @@ function sendAjaxJson(datos,callBack){
 		
 	},
 	error: function(jqXHR, textStatus, errorThrown){
-	alert(textStatus);
 	}
 	});
 	
 }
 
 function loadTableFromDb(table,task,attr1,attr2,attr3){
-	$(document).ready(function(e) {    
 	$.ajax({
 	url: 'Includes/FuncionesDB.php',
 	type: 'POST',
@@ -61,16 +48,22 @@ function loadTableFromDb(table,task,attr1,attr2,attr3){
 			}
         });
 		$(table + " > tbody:last").append(response);
+		
+		// Change the selector if needed
+		var $table = $('table.scroll'),
+			$bodyCells = $table.find('tbody tr:first').children(),
+			colWidth;
+		
+		
+		
+
 	},
 	error: function(){
-	alert('Error!');
 	}
 	});
-});
 }
 
 function loadTable(table,task,attr1,attr2,attr3){
-	$(document).ready(function(e) {    
     
 	$.ajax({
 	url: 'Includes/FuncionesDB.php',
@@ -82,10 +75,8 @@ function loadTable(table,task,attr1,attr2,attr3){
 		$(table).after(response);
 	},
 	error: function(){
-	alert('Error!');
 	}
 	});
-});
 }
 
 
@@ -103,7 +94,6 @@ function loadComboFromDB(idComboBox,task,callBackFunction){
 		callBackFunction();
 	},
 	error: function(){
-	alert('Error en combo');
 	}
 	});
 
@@ -122,7 +112,6 @@ function loadComboFromDBWithType(idComboBox,task,type,callBackFunction){
 		callBackFunction();
 	},
 	error: function(){
-	alert('Error en combo');
 	}
 	});
 
@@ -178,21 +167,4 @@ function cleanForm(formId){
 }
 
 
-function setValues(formId){
-$(document).ready(function(e) {
-        
-    
-	$.ajax({
-	url: 'Includes/FuncionesDB.php',
-	type: 'POST',
-	dataType:"html",
-	data: $(formId).serialize(),
-	success: function(response) {
-		$(idComboBox).html(response);
-	},
-	error: function(){
-	alert('Error en combo');
-	}
-	});
-});	
-}
+

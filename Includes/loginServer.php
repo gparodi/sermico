@@ -4,18 +4,19 @@ $usuario=$_POST['user'];
 $pass=md5($_POST['pass']);
 $query="call buscar_usuario('".$usuario."','".$pass."');";
 $result=executeQuery($query);
-if(mysql_num_rows($result)>=1){
-		 while($row = mysql_fetch_array($result))
+if($result){
+		 while($row = $result->fetch_assoc())
 		{
 			$user=$row['user'];
 			$perfil=$row['perfil'];
+			$ubicacion=$row['ubicacion'];
 			
 		}
 		if($user==$usuario){
 			$usuario_array=array("resultado"=>"TRUE","user"=>$user,"perfil"=>$perfil);
 			if (!isset($_SESSION)) { session_start(); }
 			 $_SESSION['user_name']=$user;
-			 $_SESSION[$user]=$perfil;
+			 $_SESSION[$user]=$ubicacion;
 			 echo json_encode($usuario_array);
 			
 		}

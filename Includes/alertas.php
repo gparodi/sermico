@@ -9,13 +9,92 @@
 	$listaPartesMail=array();
 	$listaTareasMail=array();
 	$listaMantenimientoProgramadoMail=array();
-	alertas_mantenimientosProgramados();
+	//alertas_mantenimientosProgramados();
+	verificar_mantenimientos_encurso();
+	verificar_estadoVehiculos();
+	
+
+
+
+function verificar_estadoVehiculos(){
+	$flag=0;
+	$query = "call listar_vehiculos('');";
+	$result = executeQuery($query);
+	$vehiculos=array();
+	while($row = $result->fetch_assoc())
+	  {
+		   $vehiculos[]=$row;
+		  
+	  }
+	  for($i=0;$i<sizeof($vehiculos);$i++){
+		$query = "call listar_mantenimientos_por_vehiculo('".$vehiculos[$i]['idInterno']."');";	  
+		$result = executeQuery($query);
+		
+		if($result){
+			while($row = $result->fetch_assoc())
+	  		{
+				echo $row['estado'];
+				if($row['estado']=="En curso"){
+					$flag=1;
+				}		   
+		  
+	  		}
+			echo $flag;
+			if($flag==0){
+				echo "Operativo";
+				$query1 = "call update_estado_vehiculo(null,'".$vehiculos[$i]['idInterno']."','Operativo');";	  
+				executeQuery($query1);
+				echo $query1;
+			}else{
+				$flag=0;
+			}
+		}else{
+			$query1 = "call update_estado_vehiculo(null,'".$vehiculos[$i]['idInterno']."','Operativo');";	  
+			executeQuery($query1);
+		}
+	  }
+
+	
+}
+
+
+function verificar_mantenimientos_encurso(){
+	$query = "call listar_mantenimiento(0);";
+	echo $query;
+	$result = executeQuery($query);
+	$listaMantenimientos=array();
+	while($row = $result->fetch_assoc())
+	  {
+		   $listaMantenimientos[]=$row;
+		  
+	  }
+	  for($i=0;$i<sizeof($listaMantenimientos);$i++){
+		  $mantenimiento=$listaMantenimientos[$i];
+		  //BUSCA LOS MANTENIMIENTOS EN CURSO
+		  if($mantenimiento["estado"]=="En curso"){
+			$fechaFin =DateTime::createFromFormat('Y-m-d', $mantenimiento["fechaFin"]); 
+        	$fechaActual = new DateTime('now');
+            $interval = $fechaFin->diff($fechaActual);
+			$signo=$interval->format('%R');
+            $diffDias=$interval->format('%a');
+			echo $diffDias;
+			if($diffDias>=1&&$signo=='+'){
+				
+				$query="call update_estado_mantenimiento(".$mantenimiento["idmantenimiento"].",'Realizado');";
+				$result = executeQuery($query);
+				echo $query;				
+					
+				
+			}
+		  }
+	  }
+}
 
 function alertas_mantenimientosProgramados(){
 	$query = "call listar_mantenimiento(0);";
 	$result = executeQuery($query);
 	$listaMantenimientos=array();
-	while($row = mysql_fetch_array($result))
+	while($row = $result->fetch_assoc())
 	  {
 		   $listaMantenimientos[]=$row;
 		  
@@ -34,15 +113,15 @@ function alertas_mantenimientosProgramados(){
 				//BUSCA LAS PARTES POR MANTENIMIENTO
 				$query = "call buscar_partespormantenimiento(".$mantenimiento["idmantenimiento"].");";
 				$result = executeQuery($query);
-				if(mysql_num_rows($result)>=1){
-					while($row = mysql_fetch_array($result))
+				if($result){
+					while($row = $result->fetch_assoc())
 					{
 						$listaMantenimientoProgramadoMail[]=$row;
 						echo "entro";
 						echo $row['partes_idpartes'];
 						$query = "call buscar_parte(".$row['partes_idpartes'].");";
 						$result = executeQuery($query);
-						while($row = mysql_fetch_array($result)){
+						while($row = $result->fetch_assoc()){
 							echo $row['nombre'];
 							
 						}
@@ -64,7 +143,7 @@ function alertas_planMantenimiento(){
 	$query = "call listar_planes_mantenimiento();";
 	$result = executeQuery($query);	
 	$i=0;
-	while($row = mysql_fetch_array($result))
+	while($row = $result->fetch_assoc())
 	  {
 		   $listaplanes[$i]=$row;
 		   $i++;
@@ -78,16 +157,16 @@ function alertas_planMantenimiento(){
 			//POR CADA PLAN DE MANTENIMIENTO BUSCA LAS ALERTAS CORRESPONDIENTES
 			$query = "call buscar_alertas(".$listaplanes[$i]['idplanMantenimiento'].");";
 			$result = executeQuery($query);
-			if(mysql_num_rows($result) != 0){
-				$alertas= mysql_fetch_array($result);
+			if($result){
+				$alertas= $result->fetch_assoc();
 			}
 			// POR CADA PLAN DE MANTENIMIENTO BUSCA LOS VEHICULOS INCLUIDOS EN CADA PLAN
 			$query = "call listar_vehiculos_por_plan(".$listaplanes[$i]['idplanMantenimiento'].");";
 			$result = executeQuery($query);			
 				
-			if(mysql_num_rows($result) != 0){
+			if($result){
 				$j=0;
-				while($row = mysql_fetch_array($result))
+				while($row = $result->fetch_assoc())
 				  {
 					 $vehiculos_por_plan[$j]=$row;
 					 $j++;  
@@ -119,9 +198,9 @@ function comprobarPartesVehiculos($vehiculoIncluido,$alertas){
         $query = "call listar_partes('".$vehiculoIncluido["idInterno"]."',0,null);";
         $result = executeQuery($query);
 		$kmAntes=$alertas["kmAntes"];
-        if(mysql_num_rows($result) != 0){
+        if($result){
         	$i=0;
-            while($row = mysql_fetch_array($result))
+            while($row = $result->fetch_assoc())
           	{	
             	$partes[$i]=$row;
                	$i++;
@@ -154,7 +233,7 @@ function comprobarPartesVehiculos($vehiculoIncluido,$alertas){
 					if(trim($partes[$i]['kmFinal'])!=""){  
                         $query = "call buscar_vehiculo('".$vehiculoIncluido["idInterno"]."');";
                         $result = executeQuery($query);
-						$vehiculo=mysql_fetch_array($result);
+						$vehiculo=$result->fetch_assoc();
 						$kmActual=$vehiculo['kilometros'];
 						$diffKm=$kmActual-$partes[$i]['kmFinal'];
 						
@@ -174,8 +253,8 @@ function comprobarTareas($vehiculo,$plan,$alertas){
 	// CARGA LAS TAREAS POR PLAN DE MANTENIMIENTO 
 	$query = "call listar_tareas_por_planmantenimiento(".$plan["idplanMantenimiento"].");";
   	$result = executeQuery($query);
-    if(mysql_num_rows($result) != 0){
-	    while($row = mysql_fetch_array($result))
+    if($result){
+	    while($row = $result->fetch_assoc())
       	{	
         	$tareas[]=$row;
 		}

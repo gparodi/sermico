@@ -32,9 +32,15 @@
 
 <div>
 <h1>Programa de Administracion de bienes de uso</h1>
-<p> Sitio en desarrollo. Para mayor informacion comunicarse con g.parodi@sermico.com.ar</p>
-
-<img src="Imagenes/Sitio_en_construcion.jpg" height="200"/>
+<h2>Criterio de numeracion para vehiculos de la flota de SERMICO SRL</h2>
+<ul>
+<li>Utilitarios: 101-199</li>
+<li>Transporte de pasajeros: 201-299</li>
+<li>Camiones y semiacoplados: 301-399</li>
+<li>Maquinas especiales: 401-499</li>
+</ul>
+<h2>Informacion</h2>
+<p> Para informes especiales, dudas, sugerencias y alta de nuevos usuarios, por favor comunicarse con g.parodi@sermico.com.ar</p>
 </div>
 
   
@@ -45,19 +51,5 @@
   <!-- end .container --></div>
 </body>
 <!-- InstanceEnd -->
-<script>
-$("#logout").on("click",this,function(){
-	sessionStorage.removeItem('user_name');
 
-	$.ajax({
-	url: 'Includes/logout.php',
-	type: 'POST',
-	success: function(response){
-		alert(response);
-		$(location).attr('href','index.php');
-	}
-	});
-	
-});
-</script>
 </html>

@@ -1,21 +1,21 @@
 
 <div id="panel_alta_partes">
-<h2>Descripcion de parte</h2>
-<form id="formAltaPartes" action="" title="" method="post">
+<h1>Descripcion</h1>
+<form id="formAltaPartes" class="dataform">
 
-<li><label>Tipo:</label>
-<select id="tipoParte">
+<li><label>Tipo</label></li>
+<li><select id="tipoParte">
 <option>Componentes</option>
 <option>Documentacion</option>
 <option>Accesorios</option>
-
 <option>Lubricantes</option>
 <option>Filtros</option>
 <option>Cubiertas</option>
 <option>Seguridad</option>
 </select></li>
-<li><label>Nombre:</label>
-<input id="nombreParte" type="text" /></li>
+
+<li><label>Nombre</label></li>
+<li><input id="nombreParte" type="text" /></li>
 <li><label>Descripcion:</label></li>
 <li><textarea id="descripcionParte" cols="40" rows="5"></textarea></li>
 
@@ -54,7 +54,6 @@ $(document).ready(function(e) {
 		$('#btnSubmitParte').css('display','none');
 		$("#tipoParte").prop("disabled", true);
 	}else if(sessionStorage.getItem("operacion")=="nuevo"){
-		alert("nuevo");
 		$('#btnSubmitParte').css('display','block');
 	}else if(sessionStorage.getItem("operacion")=="actualizarParte"){
 		$('#btnSubmitParte').css('display','block');

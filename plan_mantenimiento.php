@@ -29,18 +29,19 @@
 <div class="container">
     
   <!-- InstanceBeginEditable name="EditRegion2" -->
-<table id="tablaPlanMantenimiento"><thead><tr>
+<table id="tablaPlanMantenimiento"><thead>
     <th>ID</th><th>Titulo</th><th>Km</th><th>Horas</th><th>Dias</th>
     <th>Meses</th><th>Años</th><th>Descripcion</th><th>Estado</th>
-    </tr></thead><tbody>
+   </thead><tbody>
     
     </tbody>    
 </table>
-
-<button id="btnDetalles"> Ver detalles </button>
+<div id="prueba"></div>
+<button id="btnDetalles" style="display:none"> Ver detalles </button>
+<button id="btnEjecutar" style="display:none"> Ejecutar plan </button>
 
 <div  id="detallePlanMantenimiento" style="display:none">
-<form id="formPlanMantenimiento" action="" title="" method="post">
+<form id="formPlanMantenimiento" >
 
 <li><label>Titulo:</label>
 <input id="titulo" type="text" /></li>
@@ -70,28 +71,6 @@
 <li><label>Descripcion:</label></li>
 <li><textarea id="descripcion" cols="40" rows="5"></textarea></li>
 
-<h2>Vehiculos incluidos en el plan de mantenimiento</h2>
-<table id="tablaVehiculosEnPlan"><thead><tr>
-    <th>Numero</th><th>Marca</th><th>Modelo</th><th>Año</th>
-    </tr></thead><tbody></tbody>
-
-</table>
-
-<h2>Tareas de plan de mantenimiento</h2>
-<table id="tablaTareasPorPlan"><thead><tr>
-    <th>ID</th><th>Titulo</th><th>Operacion</th><th>Descripcion</th>
-    </tr></thead><tbody></tbody>
-
-</table>
-
-
-
-
-<li> <button id="btnNuevoPlan" type="submit" style="display:none" >Aceptar</button> 
-</li>
-<li> <button id="btnModificarPlan" type="submit" style="display:none">Aceptar</button> 
-</li>
-
 
 <h2>Alertas</h2>
 
@@ -99,30 +78,45 @@
 <input type="text" id="kmAntes" /></li>
 
 <li><label>Horas antes:</label>
-<input type="text" id="kmAntes" /></li>
+<input type="text" id="horasAntes" /></li>
 
 <li><label>Dias antes:</label>
-<input type="text" id="kmAntes" /></li>
+<input type="text" id="diasAntes" /></li>
 
 <li><label>Meses antes:</label>
-<input type="text" id="kmAntes" /></li>
+<input type="text" id="mesesAntes" /></li>
 
+<h3>Lista de mails para distribucion de alertas</h3><p id="leyendaAlertas" style="display:none">Por favor escriba lo mails separados por ;</p>
+<li><textarea id="listaMails" cols="40" rows="5"></textarea></li>
+
+<li><button id="btnAltaPlan" type="submit" style="display:none">Aceptar</button></li>
 </form>
-<h3>Lista de distribucion </h3>
 
-<table id="tablaMails"><thead><tr>
-    <th>Mail</th>
-    </tr></thead><tbody></tbody>
+<div id="detallesVehiculos">
+<h2>Vehiculos incluidos en el plan de mantenimiento</h2>
+<table id="tablaVehiculosEnPlan"><thead>
+    <th>Numero</th><th>Marca</th><th>Modelo</th><th>Año</th>
+   </thead><tbody></tbody>
+
 </table>
 
+<h2>Tareas de plan de mantenimiento</h2>
+<table id="tablaTareasPorPlan"><thead>
+    <th>ID</th><th>Titulo</th><th>Operacion</th><th>Descripcion</th>
+    </thead><tbody></tbody>
+
+</table>
 
 
 </div>
 
+</div>
 
+<!-- MODALS	-->
 <div id="menuPopVehiculosPorPlan" class="menuPopUp" style="display:none">
       <ul>
             <li id="modificar">Modificar</li>
+            
         </ul>
 </div>
 
@@ -134,6 +128,7 @@
 <div id="menuPopPlanMantenimiento" class="menuPopUp" style="display:none">
       <ul>
             <li id="modificar">Modificar</li>
+            <li id="nuevo">Nuevo</li>
         </ul>
 </div>
 
@@ -155,149 +150,68 @@
 
  <script>
 var $planActual;
-var $estadoDetalle=0;
-var $estado;
+var $estado="";
 var estadoModal;
-////////////-----------EVENTOS---------------////////
 
 
+$(document).ready(function(e) {
+	
+	
+	var user=window.sessionStorage.getItem('user_name');
+	var perfil=window.sessionStorage.getItem(user);
+	//COMPARA CON EL ID DE LA VENTANA...SI ES CORRECTO LO DEJA ENTRAR
+	var permiso=perfil&16;
+	if(permiso==0){
+		window.stop();
+		alert("No tiene permisos para acceder a esta funcion");
+		window.history.back();
+	}
 
-$("#btnDetalles").on("click",this,function(){
-         mostrarDetalles();
-		 /*$('#vehiculosPorPlan_Modal').load('panel_vehiculos_planmantenimiento.php');
-		 $('#vehiculosPorPlan_Modal').dialog({
-			 resizable: false,
-			  height:500,
-			  width:900,
-			  modal: true   
-      		
-    	});*/
-		 loadTableFromDb("#tablaVehiculosEnPlan","listarVehiculosPorPlanDeMantenimiento",$planActual);
-		// estadoModal.open();     
-        
-});
-
-
-$('#tablaPlanMantenimiento').not("first").on( 'click', 'td', function (e) {
+	
+	
+	
+	//CARGA LA TABLA DE PLANES DE MANTENIMIENTO
+    loadTableFromDb("#tablaPlanMantenimiento","listarPlanDeMantenimiento");
+	//EVENTO AL HACER CLICK EN UNA FILA. TOMA EL PLAN ACTUAL COMO EL ID DE LA FILA
+	$('#tablaPlanMantenimiento').not("first").on( 'click', 'td', function (e) {
     var $row = jQuery(this).closest('tr');
     var $columns = $row.find('td');
-	
+	$('tr.seleccionFila:first').removeClass("seleccionFila");
+   	$(this).closest("tr").addClass("seleccionFila");
     jQuery.each($columns, function(i, item) {
         if(i==0){
             $planActual=item.innerHTML;
-			localStorage['planActual']=$planActual;
+			//localStorage['planActual']=$planActual;
         }
- });
-    
-    
+
+ 	});
+	//MOSTRAR BOTON
+	$("#btnDetalles").css("display","block");
+	mostrarDetalles();
+	
+	});
+ 	//EVENTO AL HACER CLICK EN DETALLES
+ 	$("#btnDetalles").on("click",this,function(){
+		if($planActual!=null&&$planActual!=0){
+			if(!$("#detallePlanMantenimiento").is(":visible")){
+				$("#btnDetalles").text("Ocultar detalle");
+				$("#detallePlanMantenimiento").css({'display':'block'});
+			 	
+			}else{
+				$("#btnDetalles").text("Ver detalles");
+				$("#detallePlanMantenimiento").css({'display':'none'});
+			}
+			mostrarDetalles();
+		}   
         
-    if($("#detallePlanMantenimiento").is(':visible')){
-                
-        if($estado=="nuevo"||$estado=="modificar"){
-            if(confirm("Los datos se perderan ¿desea continuar?")){
-                $('tr.seleccionFila:first').removeClass("seleccionFila");
-                $(this).closest("tr").addClass("seleccionFila");
-                mostrar();
-            }
-        }else{
-            $('tr.seleccionFila:first').removeClass("seleccionFila");
-            $(this).closest("tr").addClass("seleccionFila");
-            mostrar();
-                                                                  
-            }
-                
-    }else{
-        $('tr.seleccionFila:first').removeClass("seleccionFila");
-        $(this).closest("tr").addClass("seleccionFila");
-    }
 });
-
-//re escribir
-$("#formPlanMantenimiento").on("submit",this,function(e){
-    var datos;
-    e.preventDefault();
-        
-    if($estado=="nuevo"){
-         datos={tarea:"altaVehiculo"};
-    }else if($estado=="modificar"){
-        datos={tarea:"modificarVehiculo"};
-    }
-    sendAjaxHtml(datos,function(dato){
-        //$(location).attr('href','vehiculos.php');
-        //$("#prueba").empty();
-        //$("#prueba").append(dato);
-        loadTableFromDb("#tablaPlanMantenimiento","cargarTablaVehiculos",$("#comboBoxFiltro").val());
-        cleanForm("#formPlanMantenimiento");
-        mostrar();
-                
-    });
-        
-        
-}); 
-
-$(document).ready(function(e) {
-    loadTableFromDb("#tablaPlanMantenimiento","listarPlanDeMantenimiento");
-	
-	
-});
-
-
-///////////--------FIN EVENTOS
-
-////////////-----------FUNCIONES ---------------////////
-
-
-function modificarVehiculosPorPlan(){
-	$('#vehiculosPorPlan_Modal').load('panel_vehiculos_planmantenimiento.php');
-		 $('#vehiculosPorPlan_Modal').dialog({
-			 resizable: false,
-			  height:500,
-			  width:900,
-			  modal: true,
-			  close: function(e,ui){
-				  loadTableFromDb("#tablaVehiculosEnPlan","listarVehiculosPorPlanDeMantenimiento",$planActual);
-				  
-			  }
-      		
-    	});
-		
-}
-
-function modificarTareasPorPlan(){
-	$('#tareasPorPlan_Modal').load('panel_tareas.php');
-		 $('#tareasPorPlan_Modal').dialog({
-			 resizable: false,
-			  height:500,
-			  width:900,
-			  modal: true,
-			  close: function(e,ui){
-					loadTableFromDb("#tablaTareasPorPlan","listar_tareas_por_planmantenimiento",$planActual);
-			  }
-      		
-    	});
-		
-}
-
-function cerrarModalTareas(){
-	$("#tareasPorPlan_Modal").dialog("close");
-}
-function cerrarModal(){
-	$("#vehiculosPorPlan_Modal").dialog("close");	
-	
-}
-
 
 
 function mostrarDetalles(){
-        if($estadoDetalle==0){
-                $("#btnDetalles").text("Ocultar detalle");
-                $("#detallePlanMantenimiento").css({'display':'block'});
-                mostrar();
-                $estadoDetalle=1;
-        }else{
-                $("#btnDetalles").text("Ver detalle");;
-                $("#detallePlanMantenimiento").css({'display':'none'});
-                $estadoDetalle=0;
+        if($("#detallePlanMantenimiento").is(":visible")){
+                
+        	mostrar();
+      
         }
 }
 
@@ -305,38 +219,128 @@ function mostrarDetalles(){
 function mostrar(){
 	
         if($planActual!=0){
-                $estado="mostrar";
-                
-                $("#btnModificarVehiculo").css({"display":"none"});
-                $("#btnNuevoVehiculo").css({"display":"none"});
-                $("#formPlanMantenimiento input").attr('readonly','readonly');
-                $("#formPlanMantenimiento textarea").attr('readonly','readonly');
-                sendAjaxJson({tarea:'getPlanDeMantenimiento',idPlanMantenimiento:$planActual},function(plan){
-                    $("#titulo").val(plan.titulo);
-                    $("#km").val(plan.km);
-                    $("#horas").val(plan.horas);
-                    $("#dias").val(plan.dias);
-                    $("#meses").val(plan.meses);
-                    $("#años").val(plan.años);
-                    $("#descripcion").val(plan.descripcion);
-                    $("#estado").val(plan.estado);
-                    loadTableFromDb("#tablaVehiculosEnPlan","listarVehiculosPorPlanDeMantenimiento",$planActual);
-					loadTableFromDb("#tablaTareasPorPlan","listar_tareas_por_planmantenimiento",$planActual);
-					
-					
-                        
-                });
-				sendAjaxJson({tarea:'getAlertas',idPlanMantenimiento:$planActual},function(alerta){
-					loadTableFromDb("#tablaMails","cargarTablaAlertasMail",$planActual);
-					$("#kmAntes").val(alerta.kmAntes);
-				});
+			$("#detallesVehiculos").css("display","block");
+			$('html,body').animate({
+        	scrollTop: $("#detallePlanMantenimiento").offset().top}, 2000);
+            $("#formPlanMantenimiento input").attr('readonly','readonly');
+            $("#formPlanMantenimiento textarea").attr('readonly','readonly');
+            sendAjaxJson({tarea:'getPlanDeMantenimiento',idPlanMantenimiento:$planActual},function(plan){
+            	$("#titulo").val(plan.titulo);
+                $("#km").val(plan.km);
+                $("#horas").val(plan.horas);
+                $("#dias").val(plan.dias);
+                $("#meses").val(plan.meses);
+                $("#años").val(plan.años);
+                $("#descripcion").val(plan.descripcion);
+                $("#estado").val(plan.estado);
+				$("#kmAntes").val(plan.kmAntes);
+				$("#diasAntes").val(plan.diasAntes);
+				$("#horasAntes").val(plan.horasAntes);
+				$("#mesesAntes").val(plan.mesesAntes);
+				$("#listaMails").val(plan.listaMails);
+                loadTableFromDb("#tablaVehiculosEnPlan","listarVehiculosPorPlanDeMantenimiento",$planActual);
+				loadTableFromDb("#tablaTareasPorPlan","listar_tareas_por_planmantenimiento",$planActual);
+			            
+         	});
+			
 				
         }
         
         
 }
 
+function nuevoPlan(){
+        if($estado=="nuevo"){
+			if($("#detallePlanMantenimiento").is(':visible')){
+					cleanForm("#formPlanMantenimiento");     
+			}else{
+					//mostrarDetalles();
+					$("#detallePlanMantenimiento").css({'display':'block'});
+					$("#btnDetalles").css({'display':'none'});
+					cleanForm("#formPlanMantenimiento");
+			}
+		}else{
+			if($("#detallePlanMantenimiento").is(':visible')){
+				mostrarDetalles();    
+			}else{
+					//mostrarDetalles();
+					$("#detallePlanMantenimiento").css({'display':'block'});
+					$("#btnDetalles").css({'display':'none'});
+					mostrarDetalles();
+					
+			}
+			
+		}
+		$("#leyendaAlertas").css("display","block");
+        $('html,body').animate({
+        scrollTop: $("#formPlanMantenimiento").offset().top
+    }, 2000);
+		$("#detallesVehiculos").css("display","none");
+        $("#formPlanMantenimiento input").removeAttr('readonly');
+        $("#formPlanMantenimiento textarea").removeAttr('readonly');
+		$("#btnAltaPlan").css("display","block");
 
+        
+}
+
+//ALTA NUEVO/MODIFICAR PLAN DE MANTENIMIENTO
+$("#formPlanMantenimiento").on("submit",this,function(e){
+    var datos;
+    e.preventDefault();
+	
+	var km=$("#km").val();
+	var titulo=$("#titulo").val();
+	var estado=$("#estado").val();
+	var horas=$("#horas").val();
+	var dias=$("#dias").val();
+	var meses=$("#meses").val();
+	var años=$("#años").val();
+	var descripcion=$("#descripcion").val();
+	
+	//ALERTAS
+	
+	var kmAntes=$("#kmAntes").val();
+	var diasAntes=$("#diasAntes").val();
+	var mesesAntes=$("#mesesAntes").val();
+	var horasAntes=$("#horasAntes").val();
+	var listaMails=$("#listaMails").val();
+	
+        
+    if($estado=="nuevo"){
+		datos={tarea:"altaPlanMantenimiento",titulo:titulo,estado:estado,km:km,horas:horas,dias:dias,meses:meses,años:años,descripcion:descripcion,kmAntes:kmAntes,diasAntes:diasAntes,mesesAntes:mesesAntes,horasAntes:horasAntes,listaMails:listaMails};      
+    }else if($estado=="modificar"){
+        datos={tarea:"modificarPlanMantenimiento",idPlan:$planActual,titulo:titulo,estado:estado,km:km,horas:horas,dias:dias,meses:meses,años:años,descripcion:descripcion,kmAntes:kmAntes,diasAntes:diasAntes,mesesAntes:mesesAntes,horasAntes:horasAntes,listaMails:listaMails};
+    }
+    sendAjaxHtml(datos,function(dato){
+		alert("El plan fue creado con exito");
+		loadTableFromDb("#tablaPlanMantenimiento","listarPlanDeMantenimiento");
+		$planActual=dato;
+		mostrarDetalles();
+        //$(location).attr('href','vehiculos.php');
+        //$("#prueba").empty();
+        //$("#prueba").append(dato);
+        //loadTableFromDb("#tablaPlanMantenimiento","cargarTablaVehiculos",$("#comboBoxFiltro").val());
+        //cleanForm("#formPlanMantenimiento");
+        
+                
+    });
+	
+	
+        
+        
+}); 
+
+
+
+
+///////////--------FIN EVENTOS
+
+
+
+
+
+
+/////////////////////_______________________________________________________________
 function borrar(){
         
         if($planActual!=0){
@@ -379,27 +383,7 @@ function modificar(){
         
 }
 
-function nuevo(){
-        
-        if($("#detallePlanMantenimiento").is(':visible')){
-                cleanForm("#formPlanMantenimiento");     
-        }else{
-                //mostrarDetalles();
-                $("#detallePlanMantenimiento").css({'display':'block'});
-                $("#btnDetalles").css({'display':'none'});
-        }
-        $('html,body').animate({
-        scrollTop: $("#formPlanMantenimiento").offset().top
-    }, 2000);
-        $("#formPlanMantenimiento input").removeAttr('readonly');
-        $("#formPlanMantenimiento textarea").removeAttr('readonly');
-        $("#btnModificarVehiculo").css({'display':'none'});
-        $("#btnNuevoVehiculo").css({'display':'block'});
-        $("#listaTipos").css({'display':'block'});
-        $("#tipo").focus();
-        $estado="nuevo";
-        
-}
+
 
 ///////////--------FIN FUNCIONES
 
@@ -482,24 +466,22 @@ $("#menuPopPlanMantenimiento").click(function(e){
         borrarVehiculo();
         break;
 		case "nuevo":
+			$estado="nuevo";
+			nuevoPlan();
+			/*
 			if($estado=="nuevo"){
 			  if(confirm("Los datos se perderan ¿desea continuar?")){
-              	nuevoVehiculo();
+              	nuevoPlan();
 			  }
 			  }else{
-				nuevoVehiculo();
+				  	$estado=="nuevo";
+					nuevoPlan();
 								  
-				}
+				}*/
               break;
 			case "modificar":
-				if($estado=="nuevo"){
-			  if(confirm("Los datos se perderan ¿desea continuar?")){
-            	   	modificarVehiculo();
-			  }
-			  }else{
-					 modificarVehiculo();
-								  
-				}
+				$estado="modificar";
+				nuevoPlan();
                               
                 break;
                   		
@@ -551,6 +533,49 @@ $("#menuPopTareasPorPlan").click(function(e){
 
 
 
+////////////-----------FUNCIONES ---------------////////
+
+
+function modificarVehiculosPorPlan(){
+	$('#vehiculosPorPlan_Modal').load('panel_vehiculos_planmantenimiento.php');
+		 $('#vehiculosPorPlan_Modal').dialog({
+			 resizable: false,
+			  height:500,
+			  width:900,
+			  modal: true,
+			  close: function(e,ui){
+				  loadTableFromDb("#tablaVehiculosEnPlan","listarVehiculosPorPlanDeMantenimiento",$planActual);
+				  
+			  }
+      		
+    	});
+		
+}
+
+function modificarTareasPorPlan(){
+	$('#tareasPorPlan_Modal').load('panel_tareas.php');
+		 $('#tareasPorPlan_Modal').dialog({
+			 resizable: false,
+			  height:500,
+			  width:900,
+			  modal: true,
+			  close: function(e,ui){
+					loadTableFromDb("#tablaTareasPorPlan","listar_tareas_por_planmantenimiento",$planActual);
+			  }
+      		
+    	});
+		
+}
+
+function cerrarModalTareas(){
+	$("#tareasPorPlan_Modal").dialog("close");
+}
+function cerrarModal(){
+	$("#vehiculosPorPlan_Modal").dialog("close");	
+	
+}
+
+});
 </script>
 
 

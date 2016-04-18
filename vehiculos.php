@@ -1,14 +1,5 @@
 
-<?php
-/*if (session_status()!=PHP_SESSION_ACTIVE) { session_start(); }
-if((session_status()!=PHP_SESSION_ACTIVE)||(empty($_SESSION['user_name'])))
-{
-header('Location: login.php');
-}else{
-	print_r($_SESSION);
-}*/
 
-?>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:ice="http://ns.adobe.com/incontextediting"><!-- InstanceBegin template="/Templates/Template_Base.dwt.php" codeOutsideHTMLIsLocked="false" -->
@@ -48,8 +39,7 @@ header('Location: login.php');
 </div>
 
 
-
-<table id="tablaVehiculos"><thead><tr>
+<table id="tablaVehiculos" class="scroll"><thead><tr>
 <th>Numero</th><th>Marca</th><th>Modelo</th><th>Patente</th><th>Año</th><th>Tipo</th><th>Kilometros</th><th>Estado</th></tr></thead><tbody></tbody>
 
 
@@ -59,53 +49,52 @@ header('Location: login.php');
 <button id="btnDetalles" style="display:none"> Ver detalles </button>
 
 <div  id="detalleVehiculos" style="display:none">
-<h2>Detalles del vehiculo</h2>
-<form id="formVehiculo" action="" title="" method="post">
+<h1>Detalles del vehiculo</h1>
+<form id="formVehiculo" class="dataform" action="" title="" method="post">
 
-<li id="listaTipos" style="display:none"><label>Tipo:</label>
-<select id="tipo">
-<option>Camioneta</option>
-<option>Camión</option>
-<option>Manipulador Telescopico</option>
-<option>Minibus</option>
-<option>Semi Remolque</option>
+<li id="listaTipos" style="display:none"><label>Tipo</label></li>
+<li><select id="tipo">
+<option>Utilitarios</option>
+<option>Camiones y Semi Acoplados</option>
+<option>Transporte de pasajeros</option>
+<option>Maquinas especiales</option>
 </select></li>
 
-<li><label>Numero:</label>
-<input id="numero" type="text" /></li>
+<li><label>Numero</label></li>
+<li><input id="numero" type="text" /></li>
 
-<li><label>Marca:</label>
-<input id="marca" type="text" /></li>
+<li><label>Marca</label></li>
+<li><input id="marca" type="text" /></li>
 
-<li><label>Modelo:</label>
-<input id="modelo" type="text" /></li>
+<li><label>Modelo</label></li>
+<li><input id="modelo" type="text" /></li>
 
-<li><label>Patente:</label>
-<input id="patente" type="text" required="required" /></li>
+<li><label>Patente</label></li>
+<li><input id="patente" type="text" required="required" /></li>
 
-<li><label>OT:</label>
-<input id="ot" type="text" /></li>
+<li><label>OT</label></li>
+<li><input id="ot" type="text" /></li>
 
-<li><label>Kilometros:</label>
-<input id="km" type="text" /></li>
+<li><label>Kilometros</label></li>
+<li><input id="km" type="text" /></li>
 
-<li><label>Año:</label>
-<input id="año" type="text" /></li>
+<li><label>Año</label></li>
+<li><input id="año" type="text" /></li>
 
-<li><label>Modelo de motor:</label>
-<input id="modeloMotor" type="text" /></li>
+<li><label>Modelo de motor</label></li>
+<li><input id="modeloMotor" type="text" /></li>
 
-<li><label>Codigo de motor:</label>
-<input id="motor" type="text" /></li>
+<li><label>Codigo de motor</label></li>
+<li><input id="motor" type="text" /></li>
 
-<li><label>Numero de chasis:</label>
-<input id="chasis" type="text" /></li>
+<li><label>Numero de chasis</label></li>
+<li><input id="chasis" type="text" /></li>
 
-<li><label>Consumo promedio:</label>
-<input id="consumo" type="text"  /></li>
+<li><label>Consumo promedio</label></li>
+<li><input id="consumo" type="text"  /></li>
 
-<li><label>Combustible:</label>
-<select id="combustible">
+<li><label>Combustible</label></li>
+<li><select id="combustible">
 <option>Gasoil grado 2</option>
 <option>Nafta grado 2</option>
 <option>Gasoil grado 3</option>
@@ -113,8 +102,8 @@ header('Location: login.php');
 </select></li>
 
 
-<li><label>Descripcion:</label></li>
-<li><textarea id="descripcion" ></textarea></li>
+<li><label>Descripcion</label></li>
+<li><textarea id="descripcion" rows="10" cols="40" ></textarea></li>
 <li> <button id="btnNuevoVehiculo" type="submit" style="display:none" value="btnNuevoVehiculo">Aceptar</button> 
 </li>
 <li> <button id="btnModificarVehiculo" type="submit" style="display:none" value="btnModificarVehiculo">Aceptar</button> 
@@ -159,23 +148,22 @@ header('Location: login.php');
  var $estadoDetalle=0;
  var $estado=null;
  var $idBtn=null;
- var $estadoModal=null;
  //FILTRO
 var $tipoPartes;
 var $vehiculoPartes=0;
 loadComboFromDB("#comboBoxFiltro","cargarComboBoxTipos",function(){
-	var $tipo=$("#comboBoxFiltro").val();
-	loadTableFromDb("#tablaVehiculos","cargarTablaVehiculos",$tipo);
+var $tipo=$("#comboBoxFiltro").val();
+loadTableFromDb("#tablaVehiculos","cargarTablaVehiculos",$tipo);
 	
 		
 });
 
-$("#logout").on("click",this,function(){
-	window.sessionStorage.clear();
-	$(location).attr('href','index.php');
-	
+
+$(document).on({
+    ajaxStart: function() { $("body").addClass("loading");    },
+     ajaxStop: function() { $("body").removeClass("loading"); }    
 });
-/*
+
 $(document).ready(function(e) {
     var user=window.sessionStorage.getItem('user_name');
 	var perfil=window.sessionStorage.getItem(user);
@@ -183,10 +171,10 @@ $(document).ready(function(e) {
 	var permiso=perfil&2;
 	if(permiso==0){
 		window.stop();
-		alert("No podes entrar aca viejo");
+		alert("No tiene permisos para acceder a esta funcion");
 		window.history.back();
 	}
-});*/
+});
 
 $("#comboBoxFiltro").on("input",function(){	
 	
@@ -204,6 +192,9 @@ loadComboFromDB("#comboBoxFiltroPartes","cargarComboBoxTiposPartes",function(){
 	$tipoPartes=$("#comboBoxFiltroPartes").val();
 	loadTableFromDb("#tablaVehiculosPartes","cargarTablaVehiculosPartes",$tipoPartes,$vehiculoActual);
 	
+	
+	
+	
 		
 });
 
@@ -214,6 +205,8 @@ $("#comboBoxFiltroPartes").on("input",function(){
 		
 	
 });
+
+
 
 
 //---FIN FILTRO
@@ -386,8 +379,14 @@ function nuevoVehiculo(){
 		$("#btnDetalles").css({'display':'none'});
 		
 	}
-	sendAjaxHtml({tarea:'getProximoVehiculo',tipo:'Camioneta'},function(response){
+	sendAjaxHtml({tarea:'getProximoVehiculo',tipo:$("#tipo").val()},function(response){
 		$("#numero").val(response);
+	});
+	
+	$("#tipo").on("change",this,function(){
+		sendAjaxHtml({tarea:'getProximoVehiculo',tipo:$("#tipo").val()},function(response){
+		$("#numero").val(response);
+	});
 	});
 	
 	$('html,body').animate({
@@ -600,8 +599,6 @@ function modificarPartesVehiculo(){
 	
 }
 function mostrarPartesVehiculos(){
-	$estadoModal='mostrar';
-	mostrarModalPartes();
 	var valorTipo=$("#comboBoxFiltroPartes").val();
 	mostrarModalPartes("Detalles "+valorTipo);
 	
@@ -617,14 +614,13 @@ function cerrarModalPartes(){
 	loadComboFromDB("#comboBoxFiltroPartes","cargarComboBoxTiposPartes",function(){
 	$tipoPartes=$("#comboBoxFiltroPartes").val();
 	loadTableFromDb("#tablaVehiculosPartes","cargarTablaVehiculosPartes",$tipoPartes,$vehiculoActual);
-	
 		
-});
+	});
 
 }
  
 </script>
-  
+<div class="modalWait"><!-- Place at bottom of page --></div>
   <!-- InstanceEndEditable -->
   <div class="footer">
       

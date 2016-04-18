@@ -114,6 +114,16 @@ function cargarKm(){
     
 
 
+    var user=window.sessionStorage.getItem('user_name');
+	var perfil=window.sessionStorage.getItem(user);
+	//COMPARA CON EL ID DE LA VENTANA...SI ES CORRECTO LO DEJA ENTRAR
+	var permiso=perfil&1;
+	if(permiso==0){
+		window.stop();
+		alert("No tiene permisos para acceder a esta funcion");
+		window.history.back();
+	}
+
 
 	 
  $("#submitKm").on("click",this,function(){

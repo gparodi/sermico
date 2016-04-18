@@ -63,8 +63,8 @@ Vehiculo:
 </div>
 
 
-<li><label>Proveedor:</label> <input type="text" id="proveedor" readonly="readonly"/></li>
-<li><label>Descripcion:</label></li>
+<li><label>Proveedor</label></li><li> <input type="text" id="proveedor" readonly="readonly"/></li>
+<li><label>Descripcion</label></li>
 <li><textarea id="descripcion" cols="60" row="20" readonly="readonly"></textarea></li>
 
 
@@ -81,12 +81,12 @@ Vehiculo:
 
 
 <h2>Descripcion del mantenimiento</h2>
-<form id="detallesParte">
- <li> <label>Parte:</label><input type="text" id="parteSeleccionada" readonly="readonly"/></li>
- <li><label>Operacion:</label><input type="text" id="operacionParte" readonly="readonly"/></li> 
-  <li>  <label>Descripcion:</label> </li>
+<form id="detallesParte" class="dataform">
+ <li> <label>Parte</label></li><li><input type="text" id="parteSeleccionada" readonly="readonly"/></li>
+ <li><label>Operacion</label></li><li><input type="text" id="operacionParte" readonly="readonly"/></li> 
+  <li>  <label>Descripcion</label> </li>
   <li><textarea id="descripcionParte" rows="10" cols="40" readonly="readonly"></textarea> </li> 
- <li> <label>Observaciones:</label> </li>
+ <li> <label>Observaciones</label> </li>
  <li> <textarea id="observacionesParte" rows="10" cols="40" readonly="readonly"></textarea></li>
 </form>
 </div>
@@ -99,7 +99,23 @@ var $vehiculoActual;
 var estadoDetalle='A';
 var datosPartes;
 $(document).ready(function(e) {
-    
+
+
+
+$(document).ready(function(e) {
+    var user=window.sessionStorage.getItem('user_name');
+	var perfil=window.sessionStorage.getItem(user);
+	//COMPARA CON EL ID DE LA VENTANA...SI ES CORRECTO LO DEJA ENTRAR
+	var permiso=perfil&4;
+	if(permiso==0){
+		window.stop();
+		alert("No tiene permisos para acceder a esta funcion");
+		window.history.back();
+	}
+});
+
+
+   
 
 loadComboFromDB("#comboBoxFiltro","cargarComboBoxTipos",function(){
 	var $tipo=$("#comboBoxFiltro").val();
